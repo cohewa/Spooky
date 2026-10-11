@@ -26,7 +26,7 @@ Safari removes temporary extensions after quitting or after 24 hours. The Safari
 
 ## Install locally
 
-Drag `build/Halloween Decor.app` to Applications. This local build is unsigned. macOS may require System Settings → Privacy & Security → Open Anyway on first launch. A distributable Safari extension needs an Xcode containing app and signing; this repository currently provides a temporary development extension.
+Drag `build/Halloween Decor.app` to Applications. This local build is ad-hoc signed, without a Developer ID or notarization. macOS may require System Settings → Privacy & Security → Open Anyway on first launch. A distributable Safari extension needs an Xcode containing app and signing; this repository currently provides a temporary development extension.
 
 ## Privacy and safety
 
