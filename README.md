@@ -1,6 +1,6 @@
 # Halloween Decor
 
-![Halloween Decor icon](safari-extension/icon-128.png)
+![Halloween Decor app icon](macos/HalloweenDecorIcon.png)
 
 ![Native macOS selection window with six preview cards](docs/mac-app-window.png)
 
@@ -26,7 +26,7 @@ A small, original Halloween decoration kit for macOS and Safari. Opening the Mac
 open "build/Halloween Decor.app"
 ```
 
-The app creates its own wallpaper and icons. It stores backups in `~/Library/Application Support/Halloween Decor/`, including a copy of the previous wallpaper image. It opens its selection window on launch; click the pumpkin in the macOS menu bar to reopen it after closing the window. **Вернуть всё** turns off all six effects and restores recorded icon and wallpaper changes. Each desktop effect is also restored when its own card is switched off. The six preview videos are original, silent, and stored inside the app. To regenerate them, run `python3 scripts/generate-previews.py` (requires Pillow and ffmpeg). To regenerate the app icon, run `python3 scripts/generate-app-icon.py` (requires Pillow and ImageMagick).
+The app creates its own wallpaper and icons. It stores backups in `~/Library/Application Support/Halloween Decor/`, including a copy of the previous wallpaper image. It opens its selection window on launch; click the pumpkin in the macOS menu bar to reopen it after closing the window. **Restore Everything** turns off all six effects and restores recorded icon and wallpaper changes. Each desktop effect is also restored when its own card is switched off. The six preview videos are original, silent, and stored inside the app. To regenerate them, run `python3 scripts/generate-previews.py` (requires Pillow and ffmpeg). To regenerate the app icon, run `python3 scripts/generate-app-icon.py` (requires Pillow and macOS `iconutil`).
 
 ## Load the Safari extension
 
@@ -44,7 +44,7 @@ All effects and settings stay on the Mac. The bridge listens only on `127.0.0.1`
 
 ## Art
 
-Vector art and drawings in this project are original and use a warm autumn palette. The attached Pinterest references informed the mood only; no Peanuts characters or third-party artwork is copied.
+Vector art and drawings in this project are original and use a warm autumn palette. The Halloween Decor app icon uses a soft black bat silhouette inspired by the supplied reference. No Peanuts characters or third-party artwork is copied.
 
 ## Status
 

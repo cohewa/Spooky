@@ -1,3 +1,10 @@
+# Halloween Decor 0.3.1
+
+- Replaced the app's pumpkin icon with the supplied style of soft black bat on a light background.
+- Added the high-resolution icon artwork to the repository and updated the icon generator.
+
+Build from source or unzip `Halloween-Decor-0.3.1-macOS.zip`. Safari still uses a temporary extension; `Halloween-Decor-0.3.1-Safari-temporary.zip` contains the browser extension.
+
 # Halloween Decor 0.3.0
 
 - Added seven autumn folder icon styles: maple bouquet, pumpkin, knit, stripes, original skeleton illustration, bat, and kitten with pumpkin.
