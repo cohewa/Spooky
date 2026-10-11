@@ -88,6 +88,64 @@ private final class PreviewCard: NSView {
     override func mouseDown(with event: NSEvent) { onSelect?(effect) }
 }
 
+private final class LoadingBatView: NSView {
+    private let left = CALayer()
+    private let right = CALayer()
+    private let body = CALayer()
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        wantsLayer = true
+        let parts: [(CALayer, String, CGRect)] = [
+            (left, "left-wing", CGRect(x: 0, y: 3, width: 42, height: 37)),
+            (right, "right-wing", CGRect(x: 49, y: 3, width: 42, height: 37)),
+            (body, "body", CGRect(x: 37, y: 3, width: 17, height: 37))
+        ]
+        for (part, name, rect) in parts {
+            if name == "left-wing" { part.anchorPoint = CGPoint(x: 1, y: 0.55) }
+            if name == "right-wing" { part.anchorPoint = CGPoint(x: 0, y: 0.55) }
+            part.frame = rect
+            if let url = Bundle.main.resourceURL?.appendingPathComponent("LoadingBat/\(name).png"),
+               let art = NSImage(contentsOf: url) {
+                part.contents = art.cgImage(forProposedRect: nil, context: nil, hints: nil)
+            }
+            part.contentsGravity = .resizeAspect
+            layer?.addSublayer(part)
+        }
+        let label = NSTextField(labelWithString: "Applying…")
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.textColor = NSColor(calibratedRed: 0.35, green: 0.22, blue: 0.19, alpha: 1)
+        label.frame = NSRect(x: 92, y: 12, width: 82, height: 18)
+        addSubview(label)
+        setAccessibilityLabel("Applying Halloween effect")
+        isHidden = true
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    func start() {
+        isHidden = false
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+        for (wing, from, to) in [(left, -0.30, 0.22), (right, 0.30, -0.22)] {
+            let flap = CABasicAnimation(keyPath: "transform.rotation.z")
+            flap.fromValue = from
+            flap.toValue = to
+            flap.duration = 0.32
+            flap.autoreverses = true
+            flap.repeatCount = .infinity
+            wing.add(flap, forKey: "flap")
+        }
+        let bob = CABasicAnimation(keyPath: "position.y")
+        bob.fromValue = body.position.y - 2
+        bob.toValue = body.position.y + 2
+        bob.duration = 0.32
+        bob.autoreverses = true
+        bob.repeatCount = .infinity
+        body.add(bob, forKey: "bob")
+    }
+    func stop() {
+        left.removeAllAnimations(); right.removeAllAnimations(); body.removeAllAnimations()
+        isHidden = true
+    }
+}
+
 private final class StickerView: NSView {
     let kind: Int
     init(kind: Int) { self.kind = kind; super.init(frame: NSRect(x: 0, y: 0, width: 112, height: 112)) }
@@ -267,6 +325,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var item: NSStatusItem!
     private var window: NSWindow!
     private var cards: [Effect: PreviewCard] = [:]
+    private var loadingBat: LoadingBatView!
+    private var isApplying = false
     private var stickers: [StickerWindow] = []
     private let webOverlay = WebOverlay()
     private var bridge: Bridge!
@@ -284,14 +344,14 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         makeWindow()
         bridge = Bridge(snapshot: { [weak self] in Dictionary(uniqueKeysWithValues: Effect.allCases.map { ($0.rawValue, self?.enabled($0) ?? false) }) })
         bridge.start()
+        showWindow()
         if enabled(.stickers) { showStickers() }
         if enabled(.webs) { webOverlay.show() }
-        if enabled(.folders) { applyFolderIcons() }
+        if enabled(.folders) { runApplying { [weak self] in self?.applyFolderIcons() } }
         folderTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in if self?.enabled(.folders) == true { self?.applyFolderIcons() } }
         NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
             if self?.enabled(.webs) == true { self?.webOverlay.show() }
         }
-        showWindow()
     }
     private func makeWindow() {
         let size = NSSize(width: 920, height: 730)
@@ -314,6 +374,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         intro.textColor = NSColor(calibratedRed: 0.44, green: 0.34, blue: 0.29, alpha: 1)
         intro.frame = NSRect(x: 25, y: 648, width: 780, height: 20)
         root.addSubview(intro)
+        loadingBat = LoadingBatView(frame: NSRect(x: 720, y: 655, width: 175, height: 50))
+        root.addSubview(loadingBat)
         let videoRoot = Bundle.main.resourceURL?.appendingPathComponent("Previews")
         for (index, effect) in Effect.allCases.enumerated() {
             let column = index % 2, row = index / 2
@@ -338,6 +400,24 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     func windowWillClose(_ notification: Notification) { cards.values.forEach { $0.pausePreview() } }
     private func toggle(_ effect: Effect) {
+        runApplying { [weak self] in self?.applyToggle(effect) }
+    }
+    private func runApplying(_ work: @escaping () -> Void) {
+        guard !isApplying else { return }
+        isApplying = true
+        loadingBat.start()
+        let started = ProcessInfo.processInfo.systemUptime
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
+            work()
+            guard let self else { return }
+            let remaining = max(0, 0.65 - (ProcessInfo.processInfo.systemUptime - started))
+            DispatchQueue.main.asyncAfter(deadline: .now() + remaining) {
+                self.loadingBat.stop()
+                self.isApplying = false
+            }
+        }
+    }
+    private func applyToggle(_ effect: Effect) {
         let active = !enabled(effect)
         if effect == .wallpaper {
             let succeeded = active ? applyWallpaper() : restoreWallpaper()
@@ -361,6 +441,9 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
     }
     @objc private func restoreEverything() {
+        runApplying { [weak self] in self?.applyRestoreEverything() }
+    }
+    private func applyRestoreEverything() {
         webOverlay.hide(); hideStickers(); restoreFolderIcons()
         let wallpaperRestored = restoreWallpaper()
         for effect in Effect.allCases {

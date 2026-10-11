@@ -1,3 +1,10 @@
+# Halloween Decor 0.4.1
+
+- Added a small bat loading indicator in the Mac window using the same silhouette as the app icon. Its wings flap while an effect is being applied or all effects are restored.
+- The indicator also appears while Desktop folder icons are applied at launch. Reduce Motion keeps the bat still while retaining the status text.
+
+Build from source or unzip `Halloween-Decor-0.4.1-macOS.zip`.
+
 # Halloween Decor 0.4.0
 
 - The Webs switch now decorates the entire Mac screen, including Safari and other apps, with a white left web and dangling spider plus the referenced pumpkin-and-bat garland on the right.
