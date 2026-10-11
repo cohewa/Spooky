@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Halloween Decor",
+  "version": "0.1.0",
+  "description": "A cozy Halloween layer for Safari, controlled by Halloween Decor for Mac.",
+  "icons": {"48": "icon-48.png", "128": "icon-128.png"},
+  "host_permissions": ["http://127.0.0.1:47831/*"],
+  "background": {"service_worker": "background.js"},
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle",
+    "all_frames": false
+  }]
+}
