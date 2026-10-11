@@ -20,7 +20,7 @@ private enum Effect: String, CaseIterable {
         case .webs: return "Delicate webs in the top corners of pages"
         case .skeletons: return "Two or three appear occasionally, without sound"
         case .stickers: return "Three stickers you can move around"
-        case .folders: return "Folders on your desktop"
+        case .folders: return "Seven random styles for Desktop folders"
         case .wallpaper: return "A warm autumn scene"
         case .cursor: return "A themed pointer on web pages"
         }
@@ -286,11 +286,18 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     private func hideStickers() { stickers.forEach { $0.orderOut(nil) } }
     private func folderBackupURL() -> URL { support.appendingPathComponent("folder-backups.json") }
+    private func folderStylesURL() -> URL { support.appendingPathComponent("folder-styles.json") }
+    private let folderStyleNames = ["maple", "pumpkin", "knit", "stripes", "skeleton", "bat", "kitten"]
     private func folderBackups() -> [String: String] {
         guard let data = try? Data(contentsOf: folderBackupURL()) else { return [:] }
         return (try? JSONDecoder().decode([String: String].self, from: data)) ?? [:]
     }
     private func saveFolderBackups(_ map: [String: String]) { if let data = try? JSONEncoder().encode(map) { try? data.write(to: folderBackupURL(), options: .atomic) } }
+    private func folderStyles() -> [String: String] {
+        guard let data = try? Data(contentsOf: folderStylesURL()) else { return [:] }
+        return (try? JSONDecoder().decode([String: String].self, from: data)) ?? [:]
+    }
+    private func saveFolderStyles(_ map: [String: String]) { if let data = try? JSONEncoder().encode(map) { try? data.write(to: folderStylesURL(), options: .atomic) } }
     private func hasCustomIcon(_ path: String) -> Bool {
         var bytes = [UInt8](repeating: 0, count: 32)
         let count = path.withCString { p in bytes.withUnsafeMutableBytes { buffer in getxattr(p, "com.apple.FinderInfo", buffer.baseAddress, 32, 0, 0) } }
@@ -299,24 +306,38 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func applyFolderIcons() {
         guard let urls = try? fm.contentsOfDirectory(at: desktop, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles]) else { return }
         var backups = folderBackups()
-        let icon = drawFolderIcon()
+        var styles = folderStyles()
+        let folderIconDirectory = Bundle.main.resourceURL?.appendingPathComponent("FolderStyles", isDirectory: true)
         for url in urls {
             let values = try? url.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
-            guard values?.isDirectory == true, values?.isSymbolicLink != true, backups[url.path] == nil else { continue }
-            let backupName: String
-            if hasCustomIcon(url.path), let data = NSWorkspace.shared.icon(forFile: url.path).tiffRepresentation {
-                backupName = UUID().uuidString + ".tiff"
-                try? data.write(to: support.appendingPathComponent(backupName), options: .atomic)
-            } else { backupName = "default" }
-            // Persist the original before changing Finder metadata.
-            backups[url.path] = backupName; saveFolderBackups(backups)
-            if !NSWorkspace.shared.setIcon(icon, forFile: url.path, options: []) { backups.removeValue(forKey: url.path); saveFolderBackups(backups) }
+            guard values?.isDirectory == true, values?.isSymbolicLink != true else { continue }
+            if backups[url.path] == nil {
+                let backupName: String
+                if hasCustomIcon(url.path), let data = NSWorkspace.shared.icon(forFile: url.path).tiffRepresentation {
+                    backupName = UUID().uuidString + ".tiff"
+                    try? data.write(to: support.appendingPathComponent(backupName), options: .atomic)
+                } else { backupName = "default" }
+                // Persist the original before changing Finder metadata.
+                backups[url.path] = backupName; saveFolderBackups(backups)
+            }
+            let style = styles[url.path] ?? folderStyleNames.randomElement() ?? "pumpkin"
+            guard let iconURL = folderIconDirectory?.appendingPathComponent(style + ".png"), let icon = NSImage(contentsOf: iconURL) else { continue }
+            styles[url.path] = style
+            saveFolderStyles(styles)
+            if !NSWorkspace.shared.setIcon(icon, forFile: url.path, options: []) {
+                styles.removeValue(forKey: url.path); saveFolderStyles(styles)
+            }
         }
     }
     private func restoreFolderIcons() {
         var backups = folderBackups()
+        var styles = folderStyles()
         for (path, name) in backups {
-            guard fm.fileExists(atPath: path) else { continue }
+            guard fm.fileExists(atPath: path) else {
+                backups.removeValue(forKey: path)
+                styles.removeValue(forKey: path)
+                continue
+            }
             let original = name == "default" ? nil : NSImage(contentsOf: support.appendingPathComponent(name))
             if name != "default" && original == nil { continue }
             if NSWorkspace.shared.setIcon(original, forFile: path, options: []) {
@@ -325,6 +346,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
         }
         saveFolderBackups(backups)
+        if backups.isEmpty { try? fm.removeItem(at: folderStylesURL()) }
+        else { saveFolderStyles(styles) }
     }
     private func wallpaperBackupURL() -> URL { support.appendingPathComponent("wallpaper-backups.json") }
     private func applyWallpaper() -> Bool {
@@ -367,22 +390,6 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if remaining.isEmpty { try? fm.removeItem(at: wallpaperBackupURL()) }
         else if let data = try? JSONEncoder().encode(remaining) { try? data.write(to: wallpaperBackupURL(), options: .atomic) }
         return remaining.isEmpty
-    }
-    private func drawFolderIcon() -> NSImage {
-        let image = NSImage(size: NSSize(width: 512, height: 512))
-        image.lockFocus()
-        NSColor(calibratedRed: 0.42, green: 0.22, blue: 0.15, alpha: 1).setFill()
-        NSBezierPath(roundedRect: NSRect(x: 34, y: 104, width: 444, height: 304), xRadius: 48, yRadius: 48).fill()
-        NSBezierPath(roundedRect: NSRect(x: 34, y: 352, width: 176, height: 93), xRadius: 30, yRadius: 30).fill()
-        NSColor(calibratedRed: 0.63, green: 0.36, blue: 0.23, alpha: 1).setFill()
-        NSBezierPath(roundedRect: NSRect(x: 34, y: 104, width: 444, height: 272), xRadius: 48, yRadius: 48).fill()
-        NSColor(calibratedRed: 0.91, green: 0.55, blue: 0.25, alpha: 1).setFill()
-        NSBezierPath(ovalIn: NSRect(x: 203, y: 158, width: 108, height: 135)).fill()
-        NSColor(calibratedRed: 0.97, green: 0.69, blue: 0.33, alpha: 1).setFill()
-        NSBezierPath(ovalIn: NSRect(x: 228, y: 158, width: 58, height: 135)).fill()
-        NSColor(calibratedRed: 0.29, green: 0.32, blue: 0.15, alpha: 1).setFill()
-        NSBezierPath(roundedRect: NSRect(x: 251, y: 281, width: 12, height: 23), xRadius: 4, yRadius: 4).fill()
-        image.unlockFocus(); return image
     }
     private func drawWallpaper() -> URL? {
         let url = support.appendingPathComponent("autumn-wallpaper.png")

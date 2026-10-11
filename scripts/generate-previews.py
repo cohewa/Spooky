@@ -10,6 +10,7 @@ OUT = ROOT / "macos" / "Previews"
 OUT.mkdir(exist_ok=True)
 W, H, FPS, FRAMES = 640, 162, 12, 36
 FONT = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 17)
+FOLDER_STYLES = [Image.open(ROOT / "macos" / "FolderStyles" / f"{name}.png").convert("RGBA") for name in ("maple", "pumpkin", "knit", "stripes", "skeleton", "bat", "kitten")]
 
 
 def rounded(draw, box, fill, radius=16, outline=None, width=1):
@@ -113,10 +114,11 @@ def frame(kind, i):
         d.text((28,19),"desktop",font=FONT,fill="#f8dfb8")
     elif kind=="folders":
         d.rectangle((0,0,W,H),fill="#52373a")
-        d.ellipse((470,25,585,140),fill="#e4a45e")
-        for j,x in enumerate((85,270,455)):
-            folder(d,x,57+int(3*math.sin(t*2*math.pi+j)))
-            d.text((x+20,137),"Autumn",font=FONT,fill="#f1d2ac")
+        d.ellipse((512,20,588,96),fill="#e4a45e")
+        for j, style in enumerate(FOLDER_STYLES):
+            x = 12 + j * 88
+            icon = style.resize((82, 82), Image.Resampling.LANCZOS)
+            im.paste(icon, (x, 31 + int(2*math.sin(t*2*math.pi+j))), icon)
     else:
         for y in range(H): d.line((0,y,W,y),fill=(56+y//10,34+y//8,49+y//9))
         d.ellipse((458,21,544,107),fill="#efd09d")

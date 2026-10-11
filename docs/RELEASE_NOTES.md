@@ -1,3 +1,11 @@
+# Halloween Decor 0.3.0
+
+- Added seven autumn folder icon styles: maple bouquet, pumpkin, knit, stripes, original skeleton illustration, bat, and kitten with pumpkin.
+- Assigns a random style to each Desktop folder when enabled and keeps that assignment stable until the effect is disabled.
+- Added a folder-style preview montage to the README and show all seven styles in the app's looping preview.
+
+Build the app from source or unzip `Halloween-Decor-0.3.0-macOS.zip` and move the app to Applications. Load the `safari-extension` folder as a temporary extension in Safari. The extension is removed by Safari when it quits or after 24 hours. See README for exact steps and limitations.
+
 # Halloween Decor 0.2.1
 
 The six cards now use native macOS switches instead of text buttons. Clicking anywhere on a card still toggles its effect. The window screenshot and installed app icon are included.

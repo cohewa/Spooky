@@ -10,7 +10,9 @@ The image above shows the page layer on a local demo page. It is not a screensho
 
 For a live Safari check, run `python3 -m http.server 47902 --bind 127.0.0.1` from the repository root and open `http://127.0.0.1:47902/demo/live.html` in Safari. Unlike `demo/index.html`, this page has no decoration script of its own, so any effects visible there come from the installed extension.
 
-A small, original Halloween decoration kit for macOS and Safari. Opening the Mac app shows one native window with six selectable cards and silent looping video previews: Safari webs, falling skeletons, desktop stickers, autumn icons for folders on the Desktop, a wallpaper, and a Safari page cursor. Click a card or its switch to apply or remove that effect immediately. Any combination is possible.
+A small, original Halloween decoration kit for macOS and Safari. Opening the Mac app shows one native window with six selectable cards and silent looping video previews: Safari webs, falling skeletons, desktop stickers, autumn icons for folders on the Desktop, a wallpaper, and a Safari page cursor. Click a card or its switch to apply or remove that effect immediately. Any combination is possible. Each Desktop folder gets a randomly selected illustrated icon from seven autumn styles; its selection stays stable until the effect is turned off.
+
+![Seven original autumn folder icon styles](docs/folder-styles.png)
 
 ## Requirements
 
