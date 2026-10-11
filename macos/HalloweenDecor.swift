@@ -303,6 +303,16 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let count = path.withCString { p in bytes.withUnsafeMutableBytes { buffer in getxattr(p, "com.apple.FinderInfo", buffer.baseAddress, 32, 0, 0) } }
         return count >= 10 && (UInt16(bytes[8]) << 8 | UInt16(bytes[9])) & 0x0400 != 0
     }
+    private func finderSafeIcon(_ source: NSImage) -> NSImage {
+        // Keep generated artwork away from Finder's icon bounds so its edge
+        // shadows and rounded corners remain visible at desktop icon sizes.
+        let canvas = NSImage(size: NSSize(width: 512, height: 512))
+        canvas.lockFocus()
+        NSGraphicsContext.current?.imageInterpolation = .high
+        source.draw(in: NSRect(x: 24, y: 24, width: 464, height: 464), from: .zero, operation: .sourceOver, fraction: 1)
+        canvas.unlockFocus()
+        return canvas
+    }
     private func applyFolderIcons() {
         guard let urls = try? fm.contentsOfDirectory(at: desktop, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles]) else { return }
         var backups = folderBackups()
@@ -321,7 +331,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 backups[url.path] = backupName; saveFolderBackups(backups)
             }
             let style = styles[url.path] ?? folderStyleNames.randomElement() ?? "pumpkin"
-            guard let iconURL = folderIconDirectory?.appendingPathComponent(style + ".png"), let icon = NSImage(contentsOf: iconURL) else { continue }
+            guard let iconURL = folderIconDirectory?.appendingPathComponent(style + ".png"), let sourceIcon = NSImage(contentsOf: iconURL) else { continue }
+            let icon = finderSafeIcon(sourceIcon)
             styles[url.path] = style
             saveFolderStyles(styles)
             if !NSWorkspace.shared.setIcon(icon, forFile: url.path, options: []) {

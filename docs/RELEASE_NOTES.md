@@ -1,3 +1,10 @@
+# Halloween Decor 0.3.2
+
+- Added a safe margin around folder artwork when applying icons so their edges remain visible in Finder.
+- Updated the folder preview animation to match the Finder spacing.
+
+Build from source or unzip `Halloween-Decor-0.3.2-macOS.zip`. Safari still uses a temporary extension; `Halloween-Decor-0.3.2-Safari-temporary.zip` contains the browser extension.
+
 # Halloween Decor 0.3.1
 
 - Replaced the app's pumpkin icon with the supplied style of soft black bat on a light background.
