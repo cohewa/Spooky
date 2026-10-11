@@ -1,4 +1,12 @@
-# Halloween Decor 0.2.0
+# Halloween Decor 0.2.1
+
+The six cards now use native macOS switches instead of text buttons. Clicking anywhere on a card still toggles its effect. The window screenshot and installed app icon are included.
+
+Build from source or unzip `Halloween-Decor-0.2.1-macOS.zip`. Safari still uses a temporary extension; `Halloween-Decor-0.2.1-Safari-temporary.zip` contains the same browser effects as 0.2.0.
+
+## Earlier releases
+
+### 0.2.0
 
 The pumpkin now opens a native macOS window with six independent cards. Each card includes a short, silent looping video preview and applies its effect immediately. The window opens on launch and can be reopened from the menu bar pumpkin.
 
@@ -11,8 +19,6 @@ The pumpkin now opens a native macOS window with six independent cards. Each car
 Build the app from source or unzip `Halloween-Decor-0.2.0-macOS.zip` and move the app to Applications. Load the `safari-extension` folder as a temporary extension in Safari. The extension is removed by Safari when it quits or after 24 hours. See README for exact steps and limitations.
 
 This app is ad-hoc signed without a Developer ID, and it is unnotarized. macOS may require Open Anyway for the first launch. A packaged Safari extension and native messaging bridge require full Xcode and are not included in this release; this build uses a loopback bridge for local development.
-
-## Earlier release
 
 ### 0.1.0
 

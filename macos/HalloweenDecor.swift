@@ -32,7 +32,7 @@ private final class PreviewCard: NSView {
     var onSelect: ((Effect) -> Void)?
     private let player: AVPlayer
     private var endObserver: NSObjectProtocol?
-    private let status = NSButton()
+    private let status = NSSwitch()
     init(effect: Effect, active: Bool, video: URL?, frame: NSRect) {
         self.effect = effect
         if let video { player = AVPlayer(url: video) } else { player = AVPlayer() }
@@ -59,14 +59,10 @@ private final class PreviewCard: NSView {
         detail.textColor = NSColor(calibratedRed: 0.48, green: 0.39, blue: 0.34, alpha: 1)
         detail.frame = NSRect(x: 17, y: 14, width: frame.width - 112, height: 17)
         addSubview(detail)
-        status.isBordered = false
         status.target = self
         status.action = #selector(didSelect)
         status.setAccessibilityLabel(effect.title)
-        status.font = .systemFont(ofSize: 12, weight: .semibold)
-        status.frame = NSRect(x: frame.width - 85, y: 25, width: 67, height: 28)
-        status.wantsLayer = true
-        status.layer?.cornerRadius = 14
+        status.frame = NSRect(x: frame.width - 75, y: 25, width: 55, height: 28)
         addSubview(status)
         setActive(active)
         player.isMuted = true
@@ -84,10 +80,7 @@ private final class PreviewCard: NSView {
     func pausePreview() { player.pause() }
     func resumePreview() { if player.currentItem != nil { player.play() } }
     func setActive(_ active: Bool) {
-        status.title = active ? "ВКЛ" : "ВЫКЛ"
-        status.contentTintColor = active ? .white : NSColor(calibratedRed: 0.42, green: 0.30, blue: 0.24, alpha: 1)
-        status.setAccessibilityValue(active ? "Включено" : "Выключено")
-        status.layer?.backgroundColor = (active ? NSColor(calibratedRed: 0.64, green: 0.29, blue: 0.16, alpha: 1) : NSColor(calibratedRed: 0.92, green: 0.86, blue: 0.79, alpha: 1)).cgColor
+        status.state = active ? .on : .off
         layer?.borderColor = (active ? NSColor(calibratedRed: 0.77, green: 0.35, blue: 0.18, alpha: 1) : NSColor(calibratedRed: 0.74, green: 0.59, blue: 0.45, alpha: 0.35)).cgColor
         layer?.borderWidth = active ? 2 : 1
     }
@@ -242,6 +235,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if effect == .wallpaper {
             let succeeded = active ? applyWallpaper() : restoreWallpaper()
             if !succeeded {
+                cards[effect]?.setActive(enabled(effect))
                 let alert = NSAlert()
                 alert.messageText = active ? "Не удалось сменить обои" : "Не удалось вернуть прежние обои"
                 alert.informativeText = "Проверь, что исходный файл обоев доступен. Остальные эффекты продолжают работать."
