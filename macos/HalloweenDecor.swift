@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import Network
 import Darwin
 
@@ -6,14 +7,92 @@ private enum Effect: String, CaseIterable {
     case webs, skeletons, stickers, folders, wallpaper, cursor
     var title: String {
         switch self {
-        case .webs: return "Spider webs in Safari"
-        case .skeletons: return "Falling skeletons in Safari"
-        case .stickers: return "Desktop stickers"
-        case .folders: return "Autumn Desktop folders"
-        case .wallpaper: return "Autumn wallpaper"
-        case .cursor: return "Halloween cursor in Safari"
+        case .webs: return "Паутина в Safari"
+        case .skeletons: return "Падающие скелеты"
+        case .stickers: return "Стикеры на рабочем столе"
+        case .folders: return "Осенние папки"
+        case .wallpaper: return "Осенние обои"
+        case .cursor: return "Курсор в Safari"
         }
     }
+    var detail: String {
+        switch self {
+        case .webs: return "Тонкая паутина в верхних углах страниц"
+        case .skeletons: return "По два или три, изредка и без звука"
+        case .stickers: return "Три стикера, которые можно передвигать"
+        case .folders: return "Папки прямо на рабочем столе"
+        case .wallpaper: return "Один тёплый осенний фон"
+        case .cursor: return "Тематический курсор на страницах"
+        }
+    }
+}
+
+private final class PreviewCard: NSView {
+    let effect: Effect
+    var onSelect: ((Effect) -> Void)?
+    private let player: AVPlayer
+    private var endObserver: NSObjectProtocol?
+    private let status = NSButton()
+    init(effect: Effect, active: Bool, video: URL?, frame: NSRect) {
+        self.effect = effect
+        if let video { player = AVPlayer(url: video) } else { player = AVPlayer() }
+        super.init(frame: frame)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor(calibratedRed: 1, green: 0.987, blue: 0.96, alpha: 1).cgColor
+        layer?.cornerRadius = 17
+        layer?.borderWidth = 1
+        layer?.borderColor = NSColor(calibratedRed: 0.74, green: 0.59, blue: 0.45, alpha: 0.35).cgColor
+        let videoLayer = AVPlayerLayer(player: player)
+        videoLayer.frame = CGRect(x: 10, y: 62, width: frame.width - 20, height: 108)
+        videoLayer.videoGravity = .resizeAspectFill
+        videoLayer.cornerRadius = 11
+        videoLayer.masksToBounds = true
+        videoLayer.backgroundColor = NSColor(calibratedRed: 0.25, green: 0.16, blue: 0.18, alpha: 1).cgColor
+        layer?.addSublayer(videoLayer)
+        let title = NSTextField(labelWithString: effect.title)
+        title.font = .systemFont(ofSize: 15, weight: .semibold)
+        title.textColor = NSColor(calibratedRed: 0.27, green: 0.16, blue: 0.13, alpha: 1)
+        title.frame = NSRect(x: 17, y: 34, width: frame.width - 115, height: 21)
+        addSubview(title)
+        let detail = NSTextField(labelWithString: effect.detail)
+        detail.font = .systemFont(ofSize: 11)
+        detail.textColor = NSColor(calibratedRed: 0.48, green: 0.39, blue: 0.34, alpha: 1)
+        detail.frame = NSRect(x: 17, y: 14, width: frame.width - 112, height: 17)
+        addSubview(detail)
+        status.isBordered = false
+        status.target = self
+        status.action = #selector(didSelect)
+        status.setAccessibilityLabel(effect.title)
+        status.font = .systemFont(ofSize: 12, weight: .semibold)
+        status.frame = NSRect(x: frame.width - 85, y: 25, width: 67, height: 28)
+        status.wantsLayer = true
+        status.layer?.cornerRadius = 14
+        addSubview(status)
+        setActive(active)
+        player.isMuted = true
+        player.actionAtItemEnd = .none
+        if let current = player.currentItem {
+            endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: current, queue: .main) { [weak self] _ in
+                self?.player.seek(to: .zero)
+                self?.player.play()
+            }
+            player.play()
+        }
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    deinit { if let endObserver { NotificationCenter.default.removeObserver(endObserver) }; player.pause() }
+    func pausePreview() { player.pause() }
+    func resumePreview() { if player.currentItem != nil { player.play() } }
+    func setActive(_ active: Bool) {
+        status.title = active ? "ВКЛ" : "ВЫКЛ"
+        status.contentTintColor = active ? .white : NSColor(calibratedRed: 0.42, green: 0.30, blue: 0.24, alpha: 1)
+        status.setAccessibilityValue(active ? "Включено" : "Выключено")
+        status.layer?.backgroundColor = (active ? NSColor(calibratedRed: 0.64, green: 0.29, blue: 0.16, alpha: 1) : NSColor(calibratedRed: 0.92, green: 0.86, blue: 0.79, alpha: 1)).cgColor
+        layer?.borderColor = (active ? NSColor(calibratedRed: 0.77, green: 0.35, blue: 0.18, alpha: 1) : NSColor(calibratedRed: 0.74, green: 0.59, blue: 0.45, alpha: 0.35)).cgColor
+        layer?.borderWidth = active ? 2 : 1
+    }
+    @objc private func didSelect() { onSelect?(effect) }
+    override func mouseDown(with event: NSEvent) { onSelect?(effect) }
 }
 
 private final class StickerView: NSView {
@@ -53,6 +132,7 @@ private final class StickerWindow: NSWindow {
         self.index = index; self.moved = moved
         super.init(contentRect: NSRect(origin: origin, size: NSSize(width: 112, height: 112)), styleMask: [.borderless], backing: .buffered, defer: false)
         isOpaque = false; backgroundColor = .clear; hasShadow = false
+        animationBehavior = .none
         level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
         collectionBehavior = [.canJoinAllSpaces, .stationary]
         isMovableByWindowBackground = true
@@ -87,10 +167,11 @@ private final class Bridge {
     }
 }
 
-private final class App: NSObject, NSApplicationDelegate {
+private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private let defaults = UserDefaults.standard
     private var item: NSStatusItem!
-    private var menuItems: [Effect: NSMenuItem] = [:]
+    private var window: NSWindow!
+    private var cards: [Effect: PreviewCard] = [:]
     private var stickers: [StickerWindow] = []
     private var bridge: Bridge!
     private var folderTimer: Timer?
@@ -102,42 +183,99 @@ private final class App: NSObject, NSApplicationDelegate {
         try? fm.createDirectory(at: support, withIntermediateDirectories: true)
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.title = "🎃"
-        let menu = NSMenu(title: "Halloween Decor")
-        for effect in Effect.allCases {
-            let entry = NSMenuItem(title: effect.title, action: #selector(toggle(_:)), keyEquivalent: "")
-            entry.target = self; entry.representedObject = effect.rawValue; entry.state = enabled(effect) ? .on : .off
-            menu.addItem(entry); menuItems[effect] = entry
-        }
-        menu.addItem(.separator())
-        let restore = NSMenuItem(title: "Restore Everything", action: #selector(restoreEverything), keyEquivalent: "")
-        restore.target = self; menu.addItem(restore)
-        menu.addItem(.separator())
-        let quit = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
-        quit.target = self; menu.addItem(quit)
-        item.menu = menu
+        item.button?.target = self
+        item.button?.action = #selector(showWindow)
+        makeWindow()
         bridge = Bridge(snapshot: { [weak self] in Dictionary(uniqueKeysWithValues: Effect.allCases.map { ($0.rawValue, self?.enabled($0) ?? false) }) })
         bridge.start()
         if enabled(.stickers) { showStickers() }
         if enabled(.folders) { applyFolderIcons() }
         folderTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in if self?.enabled(.folders) == true { self?.applyFolderIcons() } }
+        showWindow()
     }
-    @objc private func toggle(_ sender: NSMenuItem) {
-        guard let effect = Effect(rawValue: sender.representedObject as? String ?? "") else { return }
-        let active = !enabled(effect); defaults.set(active, forKey: effect.rawValue); sender.state = active ? .on : .off
+    private func makeWindow() {
+        let size = NSSize(width: 920, height: 730)
+        window = NSWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+        window.title = "Halloween Decor"
+        window.center()
+        window.isReleasedWhenClosed = false
+        window.delegate = self
+        let root = NSView(frame: NSRect(origin: .zero, size: size))
+        root.wantsLayer = true
+        root.layer?.backgroundColor = NSColor(calibratedRed: 0.97, green: 0.94, blue: 0.89, alpha: 1).cgColor
+        window.contentView = root
+        let heading = NSTextField(labelWithString: "Выбери своё настроение")
+        heading.font = .systemFont(ofSize: 29, weight: .bold)
+        heading.textColor = NSColor(calibratedRed: 0.29, green: 0.17, blue: 0.15, alpha: 1)
+        heading.frame = NSRect(x: 24, y: 674, width: 680, height: 38)
+        root.addSubview(heading)
+        let intro = NSTextField(labelWithString: "Нажми на карточку — эффект появится сразу. Можно выбрать любое сочетание.")
+        intro.font = .systemFont(ofSize: 13)
+        intro.textColor = NSColor(calibratedRed: 0.44, green: 0.34, blue: 0.29, alpha: 1)
+        intro.frame = NSRect(x: 25, y: 648, width: 780, height: 20)
+        root.addSubview(intro)
+        let videoRoot = Bundle.main.resourceURL?.appendingPathComponent("Previews")
+        for (index, effect) in Effect.allCases.enumerated() {
+            let column = index % 2, row = index / 2
+            let card = PreviewCard(effect: effect, active: enabled(effect), video: videoRoot?.appendingPathComponent(effect.rawValue + ".mp4"), frame: NSRect(x: 20 + column * 450, y: 450 - row * 195, width: 430, height: 180))
+            card.onSelect = { [weak self] effect in self?.toggle(effect) }
+            root.addSubview(card)
+            cards[effect] = card
+        }
+        let restore = NSButton(title: "Вернуть всё", target: self, action: #selector(restoreEverything))
+        restore.bezelStyle = .rounded
+        restore.frame = NSRect(x: 20, y: 28, width: 120, height: 30)
+        root.addSubview(restore)
+        let quit = NSButton(title: "Закрыть приложение", target: self, action: #selector(quitApp))
+        quit.bezelStyle = .rounded
+        quit.frame = NSRect(x: 746, y: 28, width: 150, height: 30)
+        root.addSubview(quit)
+    }
+    @objc private func showWindow() {
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        cards.values.forEach { $0.resumePreview() }
+    }
+    func windowWillClose(_ notification: Notification) { cards.values.forEach { $0.pausePreview() } }
+    private func toggle(_ effect: Effect) {
+        let active = !enabled(effect)
+        if effect == .wallpaper {
+            let succeeded = active ? applyWallpaper() : restoreWallpaper()
+            if !succeeded {
+                let alert = NSAlert()
+                alert.messageText = active ? "Не удалось сменить обои" : "Не удалось вернуть прежние обои"
+                alert.informativeText = "Проверь, что исходный файл обоев доступен. Остальные эффекты продолжают работать."
+                alert.runModal()
+                return
+            }
+        }
+        defaults.set(active, forKey: effect.rawValue)
+        cards[effect]?.setActive(active)
         switch effect {
         case .stickers: active ? showStickers() : hideStickers()
         case .folders: active ? applyFolderIcons() : restoreFolderIcons()
-        case .wallpaper: active ? applyWallpaper() : restoreWallpaper()
+        case .wallpaper: break
         default: break
         }
     }
     @objc private func restoreEverything() {
-        for effect in Effect.allCases { defaults.set(false, forKey: effect.rawValue); menuItems[effect]?.state = .off }
-        hideStickers(); restoreFolderIcons(); restoreWallpaper()
+        hideStickers(); restoreFolderIcons()
+        let wallpaperRestored = restoreWallpaper()
+        for effect in Effect.allCases {
+            let active = effect == .wallpaper && !wallpaperRestored
+            defaults.set(active, forKey: effect.rawValue)
+            cards[effect]?.setActive(active)
+        }
+        if !wallpaperRestored {
+            let alert = NSAlert()
+            alert.messageText = "Не удалось вернуть прежние обои"
+            alert.informativeText = "Исходный файл и его резервная копия недоступны. Остальные эффекты выключены."
+            alert.runModal()
+        }
     }
     @objc private func quitApp() { NSApp.terminate(nil) }
     private func showStickers() {
-        guard stickers.isEmpty else { return }
+        if !stickers.isEmpty { stickers.forEach { $0.orderFrontRegardless() }; return }
         let visible = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 900, height: 700)
         for index in 0..<3 {
             let key = "sticker.\(index)"
@@ -152,7 +290,7 @@ private final class App: NSObject, NSApplicationDelegate {
             stickers.append(sticker)
         }
     }
-    private func hideStickers() { stickers.forEach { $0.close() }; stickers.removeAll() }
+    private func hideStickers() { stickers.forEach { $0.orderOut(nil) } }
     private func folderBackupURL() -> URL { support.appendingPathComponent("folder-backups.json") }
     private func folderBackups() -> [String: String] {
         guard let data = try? Data(contentsOf: folderBackupURL()) else { return [:] }
@@ -195,28 +333,46 @@ private final class App: NSObject, NSApplicationDelegate {
         saveFolderBackups(backups)
     }
     private func wallpaperBackupURL() -> URL { support.appendingPathComponent("wallpaper-backups.json") }
-    private func applyWallpaper() {
-        guard let wallpaper = drawWallpaper() else { return }
+    private func applyWallpaper() -> Bool {
+        guard let wallpaper = drawWallpaper() else { return false }
         var backups: [String: String] = [:]
         if let data = try? Data(contentsOf: wallpaperBackupURL()) { backups = (try? JSONDecoder().decode([String: String].self, from: data)) ?? [:] }
         for (index, screen) in NSScreen.screens.enumerated() {
             let key = "screen.\(index)"
-            if backups[key] == nil, let old = NSWorkspace.shared.desktopImageURL(for: screen) { backups[key] = old.absoluteString }
-            if let data = try? JSONEncoder().encode(backups) { try? data.write(to: wallpaperBackupURL(), options: .atomic) }
-            try? NSWorkspace.shared.setDesktopImageURL(wallpaper, for: screen, options: [:])
+            if backups[key] == nil {
+                guard let old = NSWorkspace.shared.desktopImageURL(for: screen), old != wallpaper, old.isFileURL, fm.fileExists(atPath: old.path) else { return false }
+                let copy = support.appendingPathComponent("wallpaper-original-\(index)-\(UUID().uuidString).\(old.pathExtension)")
+                guard (try? fm.copyItem(at: old, to: copy)) != nil else { return false }
+                backups[key] = old.absoluteString
+                backups[key + ".copy"] = copy.absoluteString
+            }
         }
+        guard let data = try? JSONEncoder().encode(backups), (try? data.write(to: wallpaperBackupURL(), options: .atomic)) != nil else { return false }
+        for screen in NSScreen.screens {
+            do { try NSWorkspace.shared.setDesktopImageURL(wallpaper, for: screen, options: [:]) }
+            catch { _ = restoreWallpaper(); return false }
+        }
+        return true
     }
-    private func restoreWallpaper() {
-        guard let data = try? Data(contentsOf: wallpaperBackupURL()), let backups = try? JSONDecoder().decode([String: String].self, from: data) else { return }
+    private func restoreWallpaper() -> Bool {
+        guard fm.fileExists(atPath: wallpaperBackupURL().path) else { return !enabled(.wallpaper) }
+        guard let data = try? Data(contentsOf: wallpaperBackupURL()), let backups = try? JSONDecoder().decode([String: String].self, from: data) else { return false }
         var remaining = backups
         for (index, screen) in NSScreen.screens.enumerated() {
             let key = "screen.\(index)"
-            if let raw = backups[key], let url = URL(string: raw) {
-                if (try? NSWorkspace.shared.setDesktopImageURL(url, for: screen, options: [:])) != nil { remaining.removeValue(forKey: key) }
+            if let raw = backups[key], let original = URL(string: raw) {
+                let copy = backups[key + ".copy"].flatMap(URL.init(string:))
+                let candidate = fm.fileExists(atPath: original.path) ? original : copy
+                if let candidate, (try? NSWorkspace.shared.setDesktopImageURL(candidate, for: screen, options: [:])) != nil {
+                    remaining.removeValue(forKey: key)
+                    remaining.removeValue(forKey: key + ".copy")
+                    if candidate == original, let copy { try? fm.removeItem(at: copy) }
+                }
             }
         }
         if remaining.isEmpty { try? fm.removeItem(at: wallpaperBackupURL()) }
         else if let data = try? JSONEncoder().encode(remaining) { try? data.write(to: wallpaperBackupURL(), options: .atomic) }
+        return remaining.isEmpty
     }
     private func drawFolderIcon() -> NSImage {
         let image = NSImage(size: NSSize(width: 512, height: 512))

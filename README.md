@@ -2,13 +2,15 @@
 
 ![Halloween Decor icon](safari-extension/icon-128.png)
 
+![Native macOS selection window with six preview cards](docs/mac-app-window.png)
+
 ![Safari effect preview on a demo page](docs/safari-preview.png)
 
 The image above shows the page layer on a local demo page. It is not a screenshot of the extension installed in Safari.
 
 For a live Safari check, run `python3 -m http.server 47902 --bind 127.0.0.1` from the repository root and open `http://127.0.0.1:47902/demo/live.html` in Safari. Unlike `demo/index.html`, this page has no decoration script of its own, so any effects visible there come from the installed extension.
 
-A small, original Halloween decoration kit for macOS and Safari. A menu bar app controls six independent effects: Safari webs, falling skeletons, desktop stickers, autumn icons for folders on the Desktop, a wallpaper, and a Safari page cursor.
+A small, original Halloween decoration kit for macOS and Safari. Opening the Mac app shows one native window with six selectable cards and silent looping video previews: Safari webs, falling skeletons, desktop stickers, autumn icons for folders on the Desktop, a wallpaper, and a Safari page cursor. Click a card or its button to apply or remove that effect immediately. Any combination is possible.
 
 ## Requirements
 
@@ -22,7 +24,7 @@ A small, original Halloween decoration kit for macOS and Safari. A menu bar app 
 open "build/Halloween Decor.app"
 ```
 
-The app creates its own wallpaper and icons. It stores backups in `~/Library/Application Support/Halloween Decor/`. Its menu has six toggles and **Restore Everything**. Changes to folder icons and wallpaper are restored when their toggles are switched off.
+The app creates its own wallpaper and icons. It stores backups in `~/Library/Application Support/Halloween Decor/`, including a copy of the previous wallpaper image. It opens its selection window on launch; click the pumpkin in the macOS menu bar to reopen it after closing the window. **Вернуть всё** turns off all six effects and restores recorded icon and wallpaper changes. Each desktop effect is also restored when its own card is switched off. The six preview videos are original, silent, and stored inside the app. To regenerate them, run `python3 scripts/generate-previews.py` (requires Pillow and ffmpeg). To regenerate the app icon, run `python3 scripts/generate-app-icon.py` (requires Pillow and ImageMagick).
 
 ## Load the Safari extension
 

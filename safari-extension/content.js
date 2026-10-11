@@ -65,7 +65,7 @@
       apply({ webs: !!data.webs, skeletons: !!data.skeletons, cursor: !!data.cursor });
     } catch { apply({ webs: false, skeletons: false, cursor: false }); }
   }
-  sync(); setInterval(sync, 1500);
+  sync(); setInterval(sync, 750);
   burstTimer = setInterval(() => {
     if (Date.now() >= nextBurst) { burst(); nextBurst = Date.now() + 90000 + Math.random() * 90000; }
   }, 1000);
