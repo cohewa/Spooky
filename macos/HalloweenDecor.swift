@@ -7,22 +7,22 @@ private enum Effect: String, CaseIterable {
     case webs, skeletons, stickers, folders, wallpaper, cursor
     var title: String {
         switch self {
-        case .webs: return "Паутина в Safari"
-        case .skeletons: return "Падающие скелеты"
-        case .stickers: return "Стикеры на рабочем столе"
-        case .folders: return "Осенние папки"
-        case .wallpaper: return "Осенние обои"
-        case .cursor: return "Курсор в Safari"
+        case .webs: return "Safari Spiderwebs"
+        case .skeletons: return "Falling Skeletons"
+        case .stickers: return "Desktop Stickers"
+        case .folders: return "Autumn Folder Icons"
+        case .wallpaper: return "Autumn Wallpaper"
+        case .cursor: return "Halloween Cursor"
         }
     }
     var detail: String {
         switch self {
-        case .webs: return "Тонкая паутина в верхних углах страниц"
-        case .skeletons: return "По два или три, изредка и без звука"
-        case .stickers: return "Три стикера, которые можно передвигать"
-        case .folders: return "Папки прямо на рабочем столе"
-        case .wallpaper: return "Один тёплый осенний фон"
-        case .cursor: return "Тематический курсор на страницах"
+        case .webs: return "Delicate webs in the top corners of pages"
+        case .skeletons: return "Two or three appear occasionally, without sound"
+        case .stickers: return "Three stickers you can move around"
+        case .folders: return "Folders on your desktop"
+        case .wallpaper: return "A warm autumn scene"
+        case .cursor: return "A themed pointer on web pages"
         }
     }
 }
@@ -197,12 +197,12 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         root.wantsLayer = true
         root.layer?.backgroundColor = NSColor(calibratedRed: 0.97, green: 0.94, blue: 0.89, alpha: 1).cgColor
         window.contentView = root
-        let heading = NSTextField(labelWithString: "Выбери своё настроение")
+        let heading = NSTextField(labelWithString: "Set your Halloween mood")
         heading.font = .systemFont(ofSize: 29, weight: .bold)
         heading.textColor = NSColor(calibratedRed: 0.29, green: 0.17, blue: 0.15, alpha: 1)
         heading.frame = NSRect(x: 24, y: 674, width: 680, height: 38)
         root.addSubview(heading)
-        let intro = NSTextField(labelWithString: "Нажми на карточку — эффект появится сразу. Можно выбрать любое сочетание.")
+        let intro = NSTextField(labelWithString: "Click a card to apply its effect. Mix and match any combination.")
         intro.font = .systemFont(ofSize: 13)
         intro.textColor = NSColor(calibratedRed: 0.44, green: 0.34, blue: 0.29, alpha: 1)
         intro.frame = NSRect(x: 25, y: 648, width: 780, height: 20)
@@ -215,11 +215,11 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
             root.addSubview(card)
             cards[effect] = card
         }
-        let restore = NSButton(title: "Вернуть всё", target: self, action: #selector(restoreEverything))
+        let restore = NSButton(title: "Restore Everything", target: self, action: #selector(restoreEverything))
         restore.bezelStyle = .rounded
         restore.frame = NSRect(x: 20, y: 28, width: 120, height: 30)
         root.addSubview(restore)
-        let quit = NSButton(title: "Закрыть приложение", target: self, action: #selector(quitApp))
+        let quit = NSButton(title: "Quit Halloween Decor", target: self, action: #selector(quitApp))
         quit.bezelStyle = .rounded
         quit.frame = NSRect(x: 746, y: 28, width: 150, height: 30)
         root.addSubview(quit)
@@ -237,8 +237,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
             if !succeeded {
                 cards[effect]?.setActive(enabled(effect))
                 let alert = NSAlert()
-                alert.messageText = active ? "Не удалось сменить обои" : "Не удалось вернуть прежние обои"
-                alert.informativeText = "Проверь, что исходный файл обоев доступен. Остальные эффекты продолжают работать."
+                alert.messageText = active ? "Couldn’t change the wallpaper" : "Couldn’t restore the previous wallpaper"
+                alert.informativeText = "Check that the original wallpaper file is available. Other effects are unaffected."
                 alert.runModal()
                 return
             }
@@ -262,8 +262,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         if !wallpaperRestored {
             let alert = NSAlert()
-            alert.messageText = "Не удалось вернуть прежние обои"
-            alert.informativeText = "Исходный файл и его резервная копия недоступны. Остальные эффекты выключены."
+            alert.messageText = "Couldn’t restore the previous wallpaper"
+            alert.informativeText = "The original wallpaper and its backup are unavailable. Other effects have been turned off."
             alert.runModal()
         }
     }
