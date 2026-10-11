@@ -9,6 +9,7 @@
   style.textContent = `
     :host { all: initial; position: fixed; inset: 0; z-index: 2147483647; pointer-events: none; }
     .web { position: fixed; top: 0; width: 136px; height: 136px; opacity: .74; filter: drop-shadow(0 2px 2px #2c162244); }
+    .web svg, .skeleton svg { width: 100%; height: 100%; }
     .left { left: 0; } .right { right: 0; transform: scaleX(-1); }
     .skeleton { position: fixed; top: -116px; width: 76px; height: 102px; animation: fall var(--duration) cubic-bezier(.25,.55,.45,1) forwards; opacity: .94; }
     @keyframes fall { 0% { transform: translateY(-115px) rotate(-14deg); opacity: 0 } 11% { opacity: 1 } 70% { transform: translateY(var(--fall)) rotate(13deg); opacity: 1 } 88% { transform: translateY(var(--fall)) rotate(4deg); opacity: 1 } 100% { transform: translateY(calc(var(--fall) + 35px)) rotate(4deg); opacity: 0 } }

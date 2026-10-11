@@ -2,6 +2,10 @@
 
 ![Halloween Decor icon](safari-extension/icon-128.png)
 
+![Safari effect preview on a demo page](docs/safari-preview.png)
+
+The image above shows the page layer on a local demo page. It is not a screenshot of the extension installed in Safari.
+
 A small, original Halloween decoration kit for macOS and Safari. A menu bar app controls six independent effects: Safari webs, falling skeletons, desktop stickers, autumn icons for folders on the Desktop, a wallpaper, and a Safari page cursor.
 
 ## Requirements

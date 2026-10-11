@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Halloween Decor preview</title>
+<style>
+  body { margin: 0; min-height: 100vh; color: #f8e9d3; background: linear-gradient(155deg,#251822,#5d3430 70%,#9b5132); font: 18px -apple-system,BlinkMacSystemFont,sans-serif; }
+  main { max-width: 720px; margin: 13vh auto; padding: 48px; border: 1px solid #ead5b077; border-radius: 24px; background: #24182077; backdrop-filter: blur(8px); }
+  h1 { font: 54px Georgia,serif; margin: 0 0 14px; } p { line-height: 1.5; color:#efdbc1 }
+  input { width: 80%; padding: 17px; border: 0; border-radius: 12px; font-size: 17px; }
+  button { background:#e58947; border:0; border-radius:12px; padding:17px 22px; font-size:17px; }
+  small { display:block; margin-top:22px;color:#dabf9c }
+</style>
+<main><h1>A little Halloween for your Mac</h1><p>A tiny cobweb in the corners. A couple of skeletons falling by. Your page stays yours.</p><input placeholder="Search stays easy to use"><button>Search</button><small>Preview of the Safari layer. The real effects are controlled by the macOS menu.</small></main>
+<script>window.browser = {runtime:{sendMessage:async()=>({webs:true,skeletons:true,cursor:true})}};</script>
+<script src="../safari-extension/content.js"></script>
+</html>
