@@ -11,6 +11,7 @@ OUT.mkdir(exist_ok=True)
 W, H, FPS, FRAMES = 640, 162, 12, 36
 FONT = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 17)
 FOLDER_STYLES = [Image.open(ROOT / "macos" / "FolderStyles" / f"{name}.png").convert("RGBA") for name in ("maple", "pumpkin", "knit", "stripes", "skeleton", "bat", "kitten")]
+WEB_ART = {name: Image.open(ROOT / "macos" / "WebDecor" / f"{name}.png").convert("RGBA") for name in ("left-web", "spider", "right-garland", "flying-bats")}
 
 
 def rounded(draw, box, fill, radius=16, outline=None, width=1):
@@ -87,6 +88,18 @@ def frame(kind, i):
     im=Image.new("RGB",(W,H),"#2f2027")
     d=ImageDraw.Draw(im)
     t=i/FRAMES
+    if kind=="webs":
+        d.rectangle((15,12,625,151),fill="#50424d",outline="#ba9c89",width=2)
+        d.rectangle((15,12,625,31),fill="#71606b")
+        d.rectangle((39,45,235,126),fill="#786b76")
+        d.rectangle((253,45,441,126),fill="#665864")
+        for x in (43,71,99): d.ellipse((x,55,x+20,75),fill="#c58861")
+        for name,box in (("left-web",(15,12,140,147)),("right-garland",(383,16,625,105)),("spider",(20,82+int(13*math.sin(t*2*math.pi)),45,127+int(13*math.sin(t*2*math.pi))))):
+            art=WEB_ART[name].resize((box[2]-box[0],box[3]-box[1]),Image.Resampling.LANCZOS)
+            im.paste(art,box[:2],art)
+        bat=WEB_ART["flying-bats"].resize((85,80),Image.Resampling.LANCZOS)
+        im.paste(bat,(520-int(70*t),75),bat)
+        return im
     if kind in ("webs","skeletons","cursor"):
         browser(d)
         if kind=="webs":

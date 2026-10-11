@@ -7,7 +7,7 @@ private enum Effect: String, CaseIterable {
     case webs, skeletons, stickers, folders, wallpaper, cursor
     var title: String {
         switch self {
-        case .webs: return "Safari Spiderwebs"
+        case .webs: return "Screen Spiderwebs"
         case .skeletons: return "Falling Skeletons"
         case .stickers: return "Desktop Stickers"
         case .folders: return "Autumn Folder Icons"
@@ -17,7 +17,7 @@ private enum Effect: String, CaseIterable {
     }
     var detail: String {
         switch self {
-        case .webs: return "Delicate webs in the top corners of pages"
+        case .webs: return "Webs, a dangling spider and hourly bats"
         case .skeletons: return "Two or three appear occasionally, without sound"
         case .stickers: return "Three stickers you can move around"
         case .folders: return "Seven random styles for Desktop folders"
@@ -135,6 +135,108 @@ private final class StickerWindow: NSWindow {
     override func mouseUp(with event: NSEvent) { super.mouseUp(with: event); moved(index, frame.origin) }
 }
 
+private final class WebOverlay {
+    private var windows: [NSWindow] = []
+    private var spiders: [CALayer] = []
+    private var garlands: [CALayer] = []
+    private var bats: [CALayer] = []
+    private var motionTimer: Timer?
+    private var batTimer: Timer?
+    private let artwork = Bundle.main.resourceURL?.appendingPathComponent("WebDecor", isDirectory: true)
+
+    private func image(_ name: String) -> CGImage? {
+        guard let url = artwork?.appendingPathComponent(name + ".png"),
+              let image = NSImage(contentsOf: url) else { return nil }
+        return image.cgImage(forProposedRect: nil, context: nil, hints: nil)
+    }
+    private func art(_ name: String, frame: CGRect) -> CALayer {
+        let layer = CALayer()
+        layer.frame = frame
+        layer.contents = image(name)
+        layer.contentsGravity = .resizeAspect
+        layer.contentsScale = NSScreen.main?.backingScaleFactor ?? 2
+        return layer
+    }
+    func show() {
+        hide()
+        for screen in NSScreen.screens {
+            let size = screen.frame.size
+            let window = NSWindow(contentRect: screen.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isOpaque = false
+            window.backgroundColor = .clear
+            window.hasShadow = false
+            window.ignoresMouseEvents = true
+            window.level = .screenSaver
+            window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+            let view = NSView(frame: CGRect(origin: .zero, size: size))
+            view.wantsLayer = true
+            window.contentView = view
+            guard let root = view.layer else { continue }
+            root.addSublayer(art("left-web", frame: CGRect(x: 0, y: size.height - 420, width: 390, height: 420)))
+            let spider = art("spider", frame: CGRect(x: 10, y: size.height - 510, width: 78, height: 91))
+            root.addSublayer(spider); spiders.append(spider)
+            let garland = art("right-garland", frame: CGRect(x: size.width - 530, y: size.height - 190, width: 530, height: 188))
+            root.addSublayer(garland); garlands.append(garland)
+            let bat = art("flying-bats", frame: CGRect(x: size.width - 520, y: 85, width: 280, height: 272))
+            bat.opacity = 0
+            root.addSublayer(bat); bats.append(bat)
+            window.orderFrontRegardless()
+            windows.append(window)
+        }
+        animateSpider()
+        animateGarland()
+        flyBats()
+        motionTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            self?.animateSpider(); self?.animateGarland()
+        }
+        batTimer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { [weak self] _ in self?.flyBats() }
+    }
+    func hide() {
+        motionTimer?.invalidate(); batTimer?.invalidate()
+        motionTimer = nil; batTimer = nil
+        windows.forEach { $0.orderOut(nil) }
+        windows.removeAll(); spiders.removeAll(); garlands.removeAll(); bats.removeAll()
+    }
+    private func animateSpider() {
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+        for layer in spiders {
+            let movement = CABasicAnimation(keyPath: "position.y")
+            movement.fromValue = layer.position.y + 205
+            movement.toValue = layer.position.y
+            movement.duration = 2.5
+            movement.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            layer.add(movement, forKey: "spiderDrop")
+        }
+    }
+    private func animateGarland() {
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+        for layer in garlands {
+            let sway = CABasicAnimation(keyPath: "transform.rotation.z")
+            sway.fromValue = -0.015
+            sway.toValue = 0.015
+            sway.duration = 1.5
+            sway.autoreverses = true
+            sway.repeatCount = 2
+            layer.add(sway, forKey: "garlandSway")
+        }
+    }
+    private func flyBats() {
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+        for layer in bats {
+            let travel = CABasicAnimation(keyPath: "position.x")
+            travel.fromValue = layer.superlayer!.bounds.width + 160
+            travel.toValue = layer.superlayer!.bounds.width - 640
+            let fade = CAKeyframeAnimation(keyPath: "opacity")
+            fade.values = [0, 1, 1, 0]
+            fade.keyTimes = [0, 0.12, 0.86, 1]
+            let flight = CAAnimationGroup()
+            flight.animations = [travel, fade]
+            flight.duration = 8
+            layer.add(flight, forKey: "hourlyFlight")
+        }
+    }
+}
+
 private final class Bridge {
     private var listener: NWListener?
     private let snapshot: () -> [String: Bool]
@@ -166,6 +268,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var window: NSWindow!
     private var cards: [Effect: PreviewCard] = [:]
     private var stickers: [StickerWindow] = []
+    private let webOverlay = WebOverlay()
     private var bridge: Bridge!
     private var folderTimer: Timer?
     private let fm = FileManager.default
@@ -182,8 +285,12 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         bridge = Bridge(snapshot: { [weak self] in Dictionary(uniqueKeysWithValues: Effect.allCases.map { ($0.rawValue, self?.enabled($0) ?? false) }) })
         bridge.start()
         if enabled(.stickers) { showStickers() }
+        if enabled(.webs) { webOverlay.show() }
         if enabled(.folders) { applyFolderIcons() }
         folderTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in if self?.enabled(.folders) == true { self?.applyFolderIcons() } }
+        NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
+            if self?.enabled(.webs) == true { self?.webOverlay.show() }
+        }
         showWindow()
     }
     private func makeWindow() {
@@ -246,6 +353,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         defaults.set(active, forKey: effect.rawValue)
         cards[effect]?.setActive(active)
         switch effect {
+        case .webs: active ? webOverlay.show() : webOverlay.hide()
         case .stickers: active ? showStickers() : hideStickers()
         case .folders: active ? applyFolderIcons() : restoreFolderIcons()
         case .wallpaper: break
@@ -253,7 +361,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
     }
     @objc private func restoreEverything() {
-        hideStickers(); restoreFolderIcons()
+        webOverlay.hide(); hideStickers(); restoreFolderIcons()
         let wallpaperRestored = restoreWallpaper()
         for effect in Effect.allCases {
             let active = effect == .wallpaper && !wallpaperRestored

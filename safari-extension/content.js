@@ -31,12 +31,6 @@
   let burstTimer;
 
   function apply(next) {
-    if (settings.webs !== next.webs) {
-      shadow.querySelectorAll('.web').forEach(el => el.remove());
-      if (next.webs) for (const side of ['left', 'right']) {
-        const web = document.createElement('div'); web.className = `web ${side}`; web.innerHTML = webSVG; shadow.append(web);
-      }
-    }
     if (settings.cursor !== next.cursor) {
       if (next.cursor) document.documentElement.append(cursorStyle); else cursorStyle.remove();
     }

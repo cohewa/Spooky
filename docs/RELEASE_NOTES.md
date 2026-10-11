@@ -1,3 +1,11 @@
+# Halloween Decor 0.4.0
+
+- The Webs switch now decorates the entire Mac screen, including Safari and other apps, with a white left web and dangling spider plus the referenced pumpkin-and-bat garland on the right.
+- Spider and garland move once per minute; a group of bats flies across the lower-right area when switched on and once per hour afterward. Decorations allow clicks to pass through.
+- Updated the card video preview and removed duplicate Safari-only web artwork.
+
+Build from source or unzip `Halloween-Decor-0.4.0-macOS.zip`. Safari still uses a temporary extension for the skeleton and cursor effects.
+
 # Halloween Decor 0.3.3
 
 - Rebuilt the knit folder icon from the supplied reference at its original wide proportions so the whole folder shape is visible.
