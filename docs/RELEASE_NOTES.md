@@ -1,3 +1,12 @@
+# Halloween Decor 0.4.2
+
+- Reduced both screen decorations to 60% of their previous size. The left web starts below the macOS menu bar; the pumpkin-and-bat garland now sits at the lower right above the Dock.
+- Changed the dangling spider to black and softened the free ends of the web strands.
+- Bats now fly diagonally from below the left side of the screen toward the upper right, once when Webs is enabled and once each hour afterward.
+- The overlay uses a floating window level so the menu bar and Dock stay above it. Updated the card preview.
+
+Build from source or unzip `Halloween-Decor-0.4.2-macOS.zip`.
+
 # Halloween Decor 0.4.1
 
 - Added a small bat loading indicator in the Mac window using the same silhouette as the app icon. Its wings flap while an effect is being applied or all effects are restored.

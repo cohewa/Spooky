@@ -224,18 +224,19 @@ private final class WebOverlay {
             window.backgroundColor = .clear
             window.hasShadow = false
             window.ignoresMouseEvents = true
-            window.level = .screenSaver
+            // Stay above app windows while leaving the menu bar and Dock unobstructed.
+            window.level = .floating
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
             let view = NSView(frame: CGRect(origin: .zero, size: size))
             view.wantsLayer = true
             window.contentView = view
             guard let root = view.layer else { continue }
-            root.addSublayer(art("left-web", frame: CGRect(x: 0, y: size.height - 420, width: 390, height: 420)))
-            let spider = art("spider", frame: CGRect(x: 10, y: size.height - 510, width: 78, height: 91))
+            root.addSublayer(art("left-web", frame: CGRect(x: 0, y: size.height - 320, width: 234, height: 252)))
+            let spider = art("spider", frame: CGRect(x: 6, y: size.height - 374, width: 47, height: 55))
             root.addSublayer(spider); spiders.append(spider)
-            let garland = art("right-garland", frame: CGRect(x: size.width - 530, y: size.height - 190, width: 530, height: 188))
+            let garland = art("right-garland", frame: CGRect(x: size.width - 300, y: 132, width: 318, height: 113))
             root.addSublayer(garland); garlands.append(garland)
-            let bat = art("flying-bats", frame: CGRect(x: size.width - 520, y: 85, width: 280, height: 272))
+            let bat = art("flying-bats", frame: CGRect(x: -210, y: -210, width: 210, height: 204))
             bat.opacity = 0
             root.addSublayer(bat); bats.append(bat)
             window.orderFrontRegardless()
@@ -259,7 +260,7 @@ private final class WebOverlay {
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
         for layer in spiders {
             let movement = CABasicAnimation(keyPath: "position.y")
-            movement.fromValue = layer.position.y + 205
+            movement.fromValue = layer.position.y + 120
             movement.toValue = layer.position.y
             movement.duration = 2.5
             movement.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
@@ -281,15 +282,21 @@ private final class WebOverlay {
     private func flyBats() {
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
         for layer in bats {
-            let travel = CABasicAnimation(keyPath: "position.x")
-            travel.fromValue = layer.superlayer!.bounds.width + 160
-            travel.toValue = layer.superlayer!.bounds.width - 640
+            guard let bounds = layer.superlayer?.bounds else { continue }
+            let travel = CAKeyframeAnimation(keyPath: "position")
+            travel.values = [
+                CGPoint(x: -110, y: -110),
+                CGPoint(x: bounds.width * 0.25, y: bounds.height * 0.18),
+                CGPoint(x: bounds.width * 0.62, y: bounds.height * 0.55),
+                CGPoint(x: bounds.width + 140, y: bounds.height - 130)
+            ]
+            travel.keyTimes = [0, 0.25, 0.7, 1]
             let fade = CAKeyframeAnimation(keyPath: "opacity")
             fade.values = [0, 1, 1, 0]
             fade.keyTimes = [0, 0.12, 0.86, 1]
             let flight = CAAnimationGroup()
             flight.animations = [travel, fade]
-            flight.duration = 8
+            flight.duration = 9
             layer.add(flight, forKey: "hourlyFlight")
         }
     }

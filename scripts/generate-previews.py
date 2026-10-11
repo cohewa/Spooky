@@ -94,11 +94,11 @@ def frame(kind, i):
         d.rectangle((39,45,235,126),fill="#786b76")
         d.rectangle((253,45,441,126),fill="#665864")
         for x in (43,71,99): d.ellipse((x,55,x+20,75),fill="#c58861")
-        for name,box in (("left-web",(15,12,140,147)),("right-garland",(383,16,625,105)),("spider",(20,82+int(13*math.sin(t*2*math.pi)),45,127+int(13*math.sin(t*2*math.pi))))):
+        for name,box in (("left-web",(15,32,90,113)),("right-garland",(430,105,625,151)),("spider",(18,85+int(8*math.sin(t*2*math.pi)),33,112+int(8*math.sin(t*2*math.pi))))):
             art=WEB_ART[name].resize((box[2]-box[0],box[3]-box[1]),Image.Resampling.LANCZOS)
             im.paste(art,box[:2],art)
-        bat=WEB_ART["flying-bats"].resize((85,80),Image.Resampling.LANCZOS)
-        im.paste(bat,(520-int(70*t),75),bat)
+        bat=WEB_ART["flying-bats"].resize((62,60),Image.Resampling.LANCZOS)
+        im.paste(bat,(int(120+385*t),int(105-75*t)),bat)
         return im
     if kind in ("webs","skeletons","cursor"):
         browser(d)
