@@ -1,3 +1,11 @@
+# Halloween Decor 0.3.3
+
+- Rebuilt the knit folder icon from the supplied reference at its original wide proportions so the whole folder shape is visible.
+- Used the exact bat silhouette from the supplied reference in both the folder style and app icon.
+- Preserved folder artwork proportions in the preview and Finder icon canvas.
+
+Build from source or unzip `Halloween-Decor-0.3.3-macOS.zip`. Safari still uses a temporary extension; `Halloween-Decor-0.3.3-Safari-temporary.zip` contains the browser extension.
+
 # Halloween Decor 0.3.2
 
 - Added a safe margin around folder artwork when applying icons so their edges remain visible in Finder.

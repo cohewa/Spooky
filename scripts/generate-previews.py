@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render six original, silent looping previews for the native Mac window."""
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 import math
 import subprocess
 
@@ -117,9 +117,9 @@ def frame(kind, i):
         d.ellipse((512,20,588,96),fill="#e4a45e")
         for j, style in enumerate(FOLDER_STYLES):
             x = 12 + j * 88
-            icon = style.resize((74, 74), Image.Resampling.LANCZOS)
+            icon = ImageOps.contain(style, (78, 74), Image.Resampling.LANCZOS)
             padded = Image.new("RGBA", (82, 82), (0, 0, 0, 0))
-            padded.alpha_composite(icon, (4, 4))
+            padded.alpha_composite(icon, ((82-icon.width)//2, (82-icon.height)//2))
             im.paste(padded, (x, 31 + int(2*math.sin(t*2*math.pi+j))), padded)
     else:
         for y in range(H): d.line((0,y,W,y),fill=(56+y//10,34+y//8,49+y//9))
