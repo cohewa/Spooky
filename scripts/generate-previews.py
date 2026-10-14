@@ -74,10 +74,10 @@ def desktop(wallpaper=False):
         paste(image,icon,(245+j*31,H-32),(27,27))
     return image
 
-def desktop_folder(image, asset, x, y, label):
-    paste(image,asset,(x,y),(38,35))
+def desktop_folder(image, asset, x, y, label, size=(38,35)):
+    paste(image,asset,(x,y),size)
     draw=ImageDraw.Draw(image)
-    text(draw,(x+19,y+36),label,8,anchor="mt")
+    text(draw,(x+size[0]/2,y+size[1]+2),label,11 if size[0]>38 else 8,anchor="mt")
 
 def finder_window(image):
     shadow=Image.new("RGBA",image.size)
@@ -224,16 +224,16 @@ def frame(kind, index):
         image=desktop(kind=="wallpaper")
     if kind=="stickers":
         for j,sticker in enumerate(STICKERS):
-            x=68+(j%6)*86
-            y=46+(j//6)*75
+            x=26+(j%6)*102
+            y=31+(j//6)*84
             if j==7:
                 x+=round(18*math.sin(t*2*math.pi))
                 y+=round(5*math.sin(t*2*math.pi))
-            paste(image,sticker,(x,y),(43,51))
-            if j==7:pointer(ImageDraw.Draw(image),x+27,y+25)
+            paste(image,sticker,(x,y),(68,72))
+            if j==7:pointer(ImageDraw.Draw(image),x+42,y+36)
     elif kind=="folders":
         for j,asset in enumerate(FOLDER_STYLES):
-            desktop_folder(image,asset,70+j*88,93,("Projects","Photos","Ideas","Work","Notes","Personal")[j])
+            desktop_folder(image,asset,17+j*102,70,("Projects","Photos","Ideas","Work","Notes","Personal")[j],size=(76,68))
     elif kind=="wallpaper":
         autumn_widgets(image)
         for j,label in enumerate(("Projects","Photos")):
