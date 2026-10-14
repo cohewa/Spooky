@@ -12,6 +12,8 @@
 
 [![Watch Spooky in action](docs/media/spooky-demo-poster.png)](docs/media/spooky-demo.mp4)
 
+**Spider Web:** [Image](docs/media/webs.png) · [Animation](macos/Previews/webs.mp4)
+
 ## Features
 
 - **Spider Web:** four spiders hang from a web pinned to the top edge of each display, above the menu bar.
