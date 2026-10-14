@@ -206,54 +206,65 @@ private final class GlossyCloseButton: NSButton {
 
 private final class TopAlignedView: NSView { override var isFlipped: Bool { true } }
 
-private final class LoadingPawsView: NSView {
-    private var paws: [CAShapeLayer] = []
+private final class LoadingGhostView: NSView {
+    private let ghost = CAShapeLayer()
+    private let face = CAShapeLayer()
 
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        // Three small, alternating paw prints make the progress visible at a glance.
-        for index in 0..<3 {
-            let path = CGMutablePath()
-            path.addEllipse(in: CGRect(x: 4, y: 1, width: 11, height: 9))
-            for toe in [CGRect(x: 0, y: 10, width: 4, height: 5),
-                        CGRect(x: 5, y: 13, width: 4, height: 5),
-                        CGRect(x: 10, y: 13, width: 4, height: 5),
-                        CGRect(x: 15, y: 10, width: 4, height: 5)] {
-                path.addEllipse(in: toe)
-            }
-            let paw = CAShapeLayer()
-            paw.path = path
-            paw.fillColor = NSColor.white.cgColor
-            paw.frame = CGRect(x: CGFloat(index) * 24, y: index.isMultiple(of: 2) ? 12 : 17, width: 19, height: 19)
-            paw.opacity = 0.35
-            layer?.addSublayer(paw)
-            paws.append(paw)
-        }
+        let sheet = CGMutablePath()
+        sheet.move(to: CGPoint(x: 3, y: 4))
+        sheet.addCurve(to: CGPoint(x: 8, y: 29), control1: CGPoint(x: 7, y: 13), control2: CGPoint(x: 5, y: 22))
+        sheet.addCurve(to: CGPoint(x: 21, y: 39), control1: CGPoint(x: 10, y: 37), control2: CGPoint(x: 16, y: 40))
+        sheet.addCurve(to: CGPoint(x: 34, y: 29), control1: CGPoint(x: 26, y: 40), control2: CGPoint(x: 32, y: 37))
+        sheet.addCurve(to: CGPoint(x: 39, y: 4), control1: CGPoint(x: 37, y: 22), control2: CGPoint(x: 35, y: 13))
+        sheet.addCurve(to: CGPoint(x: 30, y: 7), control1: CGPoint(x: 36, y: 8), control2: CGPoint(x: 34, y: 11))
+        sheet.addCurve(to: CGPoint(x: 21, y: 4), control1: CGPoint(x: 27, y: 5), control2: CGPoint(x: 25, y: 2))
+        sheet.addCurve(to: CGPoint(x: 12, y: 7), control1: CGPoint(x: 17, y: 2), control2: CGPoint(x: 15, y: 5))
+        sheet.addCurve(to: CGPoint(x: 3, y: 4), control1: CGPoint(x: 8, y: 11), control2: CGPoint(x: 6, y: 8))
+        sheet.closeSubpath()
+        ghost.path = sheet
+        ghost.fillColor = NSColor.white.cgColor
+        ghost.frame = CGRect(x: 6, y: 5, width: 42, height: 42)
+        layer?.addSublayer(ghost)
+        let features = CGMutablePath()
+        features.addEllipse(in: CGRect(x: 14, y: 23, width: 4, height: 7))
+        features.addEllipse(in: CGRect(x: 24, y: 23, width: 4, height: 7))
+        features.addEllipse(in: CGRect(x: 20, y: 16, width: 3, height: 4))
+        face.path = features
+        face.fillColor = NSColor(calibratedWhite: 0.08, alpha: 1).cgColor
+        face.opacity = 0
+        ghost.addSublayer(face)
         let label = NSTextField(labelWithString: "Applying…")
         label.font = InterfaceFont.regular(12)
         label.textColor = .white
-        label.frame = NSRect(x: 78, y: 16, width: 95, height: 18)
+        label.frame = NSRect(x: 61, y: 16, width: 108, height: 18)
         addSubview(label)
-        setAccessibilityLabel("Applying Halloween effect, animated paw prints")
+        setAccessibilityLabel("Applying Halloween effect, ghost peeking from a sheet")
         isHidden = true
     }
     required init?(coder: NSCoder) { fatalError() }
     func start() {
         isHidden = false
+        face.opacity = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? 1 : 0
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
-        for (index, paw) in paws.enumerated() {
-            let step = CAKeyframeAnimation(keyPath: "opacity")
-            step.values = [0.35, 1, 0.35]
-            step.keyTimes = [0, 0.25, 1]
-            step.duration = 1.2
-            step.beginTime = CACurrentMediaTime() + Double(index) * 0.22
-            step.repeatCount = .infinity
-            paw.add(step, forKey: "step")
-        }
+        let sway = CAKeyframeAnimation(keyPath: "transform.rotation.z")
+        sway.values = [0, -0.07, 0.09, 0.04, 0]
+        sway.keyTimes = [0, 0.2, 0.42, 0.75, 1]
+        sway.duration = 1.4
+        sway.repeatCount = .infinity
+        ghost.add(sway, forKey: "sheet-sway")
+        let peek = CAKeyframeAnimation(keyPath: "opacity")
+        peek.values = [0, 0, 1, 1, 0]
+        peek.keyTimes = [0, 0.18, 0.32, 0.74, 1]
+        peek.duration = 1.4
+        peek.repeatCount = .infinity
+        face.add(peek, forKey: "peek")
     }
     func stop() {
-        paws.forEach { $0.removeAllAnimations() }
+        ghost.removeAllAnimations()
+        face.removeAllAnimations()
         isHidden = true
     }
 }
@@ -722,7 +733,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var item: NSStatusItem!
     private var window: NSWindow!
     private var cards: [Effect: PreviewCard] = [:]
-    private var loadingPaws: LoadingPawsView!
+    private var loadingGhost: LoadingGhostView!
     private var isApplying = false
     private var stickers: [StickerWindow] = []
     private let webOverlay = WebOverlay()
@@ -865,8 +876,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         close.action = #selector(closeWindow)
         close.setAccessibilityLabel("Close Spooky")
         root.addSubview(close)
-        loadingPaws = LoadingPawsView(frame: NSRect(x: size.width - 253, y: size.height - 161, width: 175, height: 50))
-        root.addSubview(loadingPaws)
+        loadingGhost = LoadingGhostView(frame: NSRect(x: size.width - 253, y: size.height - 161, width: 175, height: 50))
+        root.addSubview(loadingGhost)
         let scroll = NSScrollView(frame: NSRect(x: 65, y: 35, width: size.width - 130, height: size.height - 207))
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = true
@@ -926,14 +937,14 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func runApplying(_ work: @escaping () -> Void) {
         guard !isApplying else { return }
         isApplying = true
-        loadingPaws.start()
+        loadingGhost.start()
         let started = ProcessInfo.processInfo.systemUptime
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
             work()
             guard let self else { return }
-            let remaining = max(0, 1.1 - (ProcessInfo.processInfo.systemUptime - started))
+            let remaining = max(0, 1.4 - (ProcessInfo.processInfo.systemUptime - started))
             DispatchQueue.main.asyncAfter(deadline: .now() + remaining) {
-                self.loadingPaws.stop()
+                self.loadingGhost.stop()
                 self.isApplying = false
             }
         }
