@@ -205,54 +205,35 @@ private final class GlossyCloseButton: NSButton {
 private final class TopAlignedView: NSView { override var isFlipped: Bool { true } }
 
 private final class LoadingBatView: NSView {
-    private let left = CAShapeLayer()
-    private let right = CAShapeLayer()
-    private let body = CAShapeLayer()
+    private let bat = CAShapeLayer()
 
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        let white = NSColor.white.cgColor
-        let wing = CGMutablePath()
-        wing.move(to: CGPoint(x: 38, y: 18))
-        wing.addCurve(to: CGPoint(x: 1, y: 33), control1: CGPoint(x: 25, y: 31), control2: CGPoint(x: 11, y: 36))
-        wing.addQuadCurve(to: CGPoint(x: 6, y: 17), control: CGPoint(x: 0, y: 22))
-        wing.addQuadCurve(to: CGPoint(x: 16, y: 19), control: CGPoint(x: 11, y: 27))
-        wing.addQuadCurve(to: CGPoint(x: 26, y: 14), control: CGPoint(x: 21, y: 23))
-        wing.addQuadCurve(to: CGPoint(x: 38, y: 18), control: CGPoint(x: 32, y: 24))
-        wing.closeSubpath()
-        left.frame = CGRect(x: 0, y: 3, width: 38, height: 37)
-        left.anchorPoint = CGPoint(x: 1, y: 0.55)
-        left.path = wing
-        left.fillColor = white
-        right.frame = CGRect(x: 53, y: 3, width: 38, height: 37)
-        right.anchorPoint = CGPoint(x: 0, y: 0.55)
-        var mirror = CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: 38, ty: 0)
-        right.path = wing.copy(using: &mirror)
-        right.fillColor = white
-        let bodyPath = CGMutablePath()
-        bodyPath.move(to: CGPoint(x: 11.5, y: 2))
-        bodyPath.addCurve(to: CGPoint(x: 2, y: 17), control1: CGPoint(x: 5, y: 2), control2: CGPoint(x: 2, y: 9))
-        bodyPath.addLine(to: CGPoint(x: 2, y: 29))
-        bodyPath.addLine(to: CGPoint(x: 4, y: 37))
-        bodyPath.addLine(to: CGPoint(x: 9, y: 32))
-        bodyPath.addQuadCurve(to: CGPoint(x: 14, y: 32), control: CGPoint(x: 11.5, y: 33))
-        bodyPath.addLine(to: CGPoint(x: 19, y: 37))
-        bodyPath.addLine(to: CGPoint(x: 21, y: 29))
-        bodyPath.addLine(to: CGPoint(x: 21, y: 17))
-        bodyPath.addCurve(to: CGPoint(x: 11.5, y: 2), control1: CGPoint(x: 21, y: 9), control2: CGPoint(x: 18, y: 2))
-        bodyPath.closeSubpath()
-        body.frame = CGRect(x: 34, y: 3, width: 23, height: 37)
-        body.path = bodyPath
-        body.fillColor = white
-        let eyes = CAShapeLayer()
-        let eyesPath = CGMutablePath()
-        eyesPath.addEllipse(in: CGRect(x: 6, y: 21, width: 3, height: 4))
-        eyesPath.addEllipse(in: CGRect(x: 14, y: 21, width: 3, height: 4))
-        eyes.path = eyesPath
-        eyes.fillColor = NSColor(calibratedWhite: 0.08, alpha: 1).cgColor
-        body.addSublayer(eyes)
-        for part in [left, right, body] { layer?.addSublayer(part) }
+        // Use the wide, angular silhouette from Spooky's app icon.
+        let silhouette = CGMutablePath()
+        silhouette.move(to: CGPoint(x: 45, y: 3))
+        silhouette.addQuadCurve(to: CGPoint(x: 33, y: 14), control: CGPoint(x: 39, y: 15))
+        silhouette.addQuadCurve(to: CGPoint(x: 24, y: 11), control: CGPoint(x: 29, y: 18))
+        silhouette.addQuadCurve(to: CGPoint(x: 15, y: 16), control: CGPoint(x: 21, y: 20))
+        silhouette.addQuadCurve(to: CGPoint(x: 4, y: 14), control: CGPoint(x: 9, y: 23))
+        silhouette.addCurve(to: CGPoint(x: 5, y: 37), control1: CGPoint(x: -1, y: 20), control2: CGPoint(x: 1, y: 32))
+        silhouette.addCurve(to: CGPoint(x: 39, y: 21), control1: CGPoint(x: 13, y: 30), control2: CGPoint(x: 28, y: 28))
+        silhouette.addLine(to: CGPoint(x: 40, y: 34))
+        silhouette.addQuadCurve(to: CGPoint(x: 45, y: 29), control: CGPoint(x: 44, y: 34))
+        silhouette.addQuadCurve(to: CGPoint(x: 50, y: 34), control: CGPoint(x: 46, y: 34))
+        silhouette.addLine(to: CGPoint(x: 51, y: 21))
+        silhouette.addCurve(to: CGPoint(x: 85, y: 37), control1: CGPoint(x: 62, y: 28), control2: CGPoint(x: 77, y: 30))
+        silhouette.addCurve(to: CGPoint(x: 86, y: 14), control1: CGPoint(x: 89, y: 32), control2: CGPoint(x: 91, y: 20))
+        silhouette.addQuadCurve(to: CGPoint(x: 75, y: 16), control: CGPoint(x: 81, y: 23))
+        silhouette.addQuadCurve(to: CGPoint(x: 66, y: 11), control: CGPoint(x: 69, y: 20))
+        silhouette.addQuadCurve(to: CGPoint(x: 57, y: 14), control: CGPoint(x: 61, y: 18))
+        silhouette.addQuadCurve(to: CGPoint(x: 45, y: 3), control: CGPoint(x: 51, y: 15))
+        silhouette.closeSubpath()
+        bat.frame = CGRect(x: 0, y: 4, width: 90, height: 40)
+        bat.path = silhouette
+        bat.fillColor = NSColor.white.cgColor
+        layer?.addSublayer(bat)
         let label = NSTextField(labelWithString: "Applying…")
         label.font = InterfaceFont.regular(12)
         label.textColor = .white
@@ -265,25 +246,23 @@ private final class LoadingBatView: NSView {
     func start() {
         isHidden = false
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
-        for (wing, from, to) in [(left, -0.30, 0.22), (right, 0.30, -0.22)] {
-            let flap = CABasicAnimation(keyPath: "transform.rotation.z")
-            flap.fromValue = from
-            flap.toValue = to
-            flap.duration = 0.32
-            flap.autoreverses = true
-            flap.repeatCount = .infinity
-            wing.add(flap, forKey: "flap")
-        }
         let bob = CABasicAnimation(keyPath: "position.y")
-        bob.fromValue = body.position.y - 2
-        bob.toValue = body.position.y + 2
-        bob.duration = 0.32
+        bob.fromValue = bat.position.y - 3
+        bob.toValue = bat.position.y + 3
+        bob.duration = 0.38
         bob.autoreverses = true
         bob.repeatCount = .infinity
-        body.add(bob, forKey: "bob")
+        bat.add(bob, forKey: "bob")
+        let pulse = CABasicAnimation(keyPath: "transform.scale")
+        pulse.fromValue = 0.92
+        pulse.toValue = 1.05
+        pulse.duration = 0.38
+        pulse.autoreverses = true
+        pulse.repeatCount = .infinity
+        bat.add(pulse, forKey: "pulse")
     }
     func stop() {
-        left.removeAllAnimations(); right.removeAllAnimations(); body.removeAllAnimations()
+        bat.removeAllAnimations()
         isHidden = true
     }
 }
@@ -905,7 +884,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
             work()
             guard let self else { return }
-            let remaining = max(0, 0.65 - (ProcessInfo.processInfo.systemUptime - started))
+            let remaining = max(0, 1.1 - (ProcessInfo.processInfo.systemUptime - started))
             DispatchQueue.main.asyncAfter(deadline: .now() + remaining) {
                 self.loadingBat.stop()
                 self.isApplying = false
