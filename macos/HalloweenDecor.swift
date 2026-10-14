@@ -212,7 +212,7 @@ private final class LoadingBatView: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        let orange = NSColor(calibratedRed: 1, green: 0.46, blue: 0.055, alpha: 1).cgColor
+        let white = NSColor.white.cgColor
         let wing = CGMutablePath()
         wing.move(to: CGPoint(x: 42, y: 18))
         wing.addCurve(to: CGPoint(x: 1, y: 34), control1: CGPoint(x: 28, y: 30), control2: CGPoint(x: 15, y: 37))
@@ -224,12 +224,12 @@ private final class LoadingBatView: NSView {
         left.frame = CGRect(x: 0, y: 3, width: 42, height: 37)
         left.anchorPoint = CGPoint(x: 1, y: 0.55)
         left.path = wing
-        left.fillColor = orange
+        left.fillColor = white
         right.frame = CGRect(x: 49, y: 3, width: 42, height: 37)
         right.anchorPoint = CGPoint(x: 0, y: 0.55)
         var mirror = CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: 42, ty: 0)
         right.path = wing.copy(using: &mirror)
-        right.fillColor = orange
+        right.fillColor = white
         let bodyPath = CGMutablePath()
         bodyPath.move(to: CGPoint(x: 8.5, y: 3))
         bodyPath.addCurve(to: CGPoint(x: 2, y: 16), control1: CGPoint(x: 3, y: 6), control2: CGPoint(x: 1, y: 10))
@@ -243,11 +243,11 @@ private final class LoadingBatView: NSView {
         bodyPath.closeSubpath()
         body.frame = CGRect(x: 37, y: 3, width: 17, height: 37)
         body.path = bodyPath
-        body.fillColor = orange
+        body.fillColor = white
         for part in [left, right, body] { layer?.addSublayer(part) }
         let label = NSTextField(labelWithString: "Applying…")
         label.font = InterfaceFont.regular(12)
-        label.textColor = NSColor(calibratedRed: 1, green: 0.46, blue: 0.055, alpha: 1)
+        label.textColor = .white
         label.frame = NSRect(x: 92, y: 12, width: 82, height: 18)
         addSubview(label)
         setAccessibilityLabel("Applying Halloween effect")
