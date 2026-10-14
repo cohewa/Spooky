@@ -2,7 +2,7 @@
 
 ![Spooky — a Halloween layer for your Mac, rendered in 3D](docs/media/spooky-black-hero.png)
 
-*Stylized 3D preview. See the actual app and feature previews below.*
+*Stylized 3D preview. Watch the real app in the video below.*
 
 **Spooky adds a little Halloween to macOS:** a screen-top spider web, movable desktop stickers, illustrated folder icons, a pumpkin wallpaper with widget decorations, and a candy pointer. Turn each effect on or off in one small Mac app.
 
@@ -10,17 +10,7 @@
 
 ## See it in action
 
-[Watch the 18-second overview](docs/media/overview.mp4) · [View the feature gallery](docs/media/gallery.png) · [See the app window](docs/mac-app-window.png)
-
-| Effect | Still | Animation |
-| --- | --- | --- |
-| Spider Web | [Image](docs/media/webs.png) | [Video](macos/Previews/webs.mp4) |
-| Desktop Stickers | [Image](docs/media/stickers.png) | [Video](macos/Previews/stickers.mp4) |
-| Autumn Folder Icons | [Image](docs/media/folders.png) | [Video](macos/Previews/folders.mp4) |
-| Pumpkin Wallpaper | [Image](docs/media/wallpaper.png) | [Video](macos/Previews/wallpaper.mp4) |
-| Candy Cursor | [Image](docs/media/cursor.png) | [Video](macos/Previews/cursor.mp4) |
-
-The stills and videos are product previews. Actual appearance depends on screen size, macOS version, Desktop layout, and cursor behavior in the active app.
+[![Watch Spooky in action](docs/media/spooky-demo-poster.png)](docs/media/spooky-demo.mp4)
 
 ## Features
 
