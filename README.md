@@ -1,51 +1,64 @@
-# Halloween Decor
+# Spooky
 
-![Halloween Decor app icon](macos/HalloweenDecorIcon.png)
+![Spooky — a Halloween layer for your Mac](docs/media/cover.png)
 
-![Native macOS selection window with six preview cards](docs/mac-app-window.png)
+**Spooky adds a little Halloween to macOS:** a screen-top spider web, movable desktop stickers, illustrated folder icons, a pumpkin wallpaper with widget decorations, and a candy pointer. Turn each effect on or off in one small Mac app.
 
-![Safari effect preview on a demo page](docs/safari-preview.png)
+> **Release status:** This repository publishes source code, MIT-licensed artwork, and previews. The Mac app built locally is a development build; the Safari extension currently uses Safari's temporary extension workflow. Uploaded binaries were removed from all 11 older Halloween Decor releases because they were ad-hoc signed and not notarized. Their pages and source tags remain for historical reference; GitHub's automatic source archives are not a Spooky installer. A public, one-click Spooky download requires a signed and notarized Mac build and a packaged Safari extension if that extension is advertised. See [Publishing](docs/PUBLISHING.md).
 
-The image above shows the page layer on a local demo page. It is not a screenshot of the extension installed in Safari.
+## See it in action
 
-For a live Safari check, run `python3 -m http.server 47902 --bind 127.0.0.1` from the repository root and open `http://127.0.0.1:47902/demo/live.html` in Safari. Unlike `demo/index.html`, this page has no decoration script of its own, so any effects visible there come from the installed extension.
+[Watch the 18-second overview](docs/media/overview.mp4) · [View the feature gallery](docs/media/gallery.png) · [See the app window](docs/mac-app-window.png)
 
-A small, original Halloween decoration kit for macOS and Safari. Opening the Mac app shows one native window with six selectable cards and silent looping video previews: screen-wide webs with a dangling spider, a hanging Halloween garland and hourly bats, falling skeletons, desktop stickers, autumn icons for folders on the Desktop, a wallpaper, and a Safari page cursor. Click a card or its switch to apply or remove that effect immediately. Any combination is possible. Each Desktop folder gets a randomly selected illustrated icon from seven autumn styles; its selection stays stable until the effect is turned off.
+| Effect | Still | Animation |
+| --- | --- | --- |
+| Spider Web | [Image](docs/media/webs.png) | [Video](macos/Previews/webs.mp4) |
+| Desktop Stickers | [Image](docs/media/stickers.png) | [Video](macos/Previews/stickers.mp4) |
+| Autumn Folder Icons | [Image](docs/media/folders.png) | [Video](macos/Previews/folders.mp4) |
+| Pumpkin Wallpaper | [Image](docs/media/wallpaper.png) | [Video](macos/Previews/wallpaper.mp4) |
+| Candy Cursor | [Image](docs/media/cursor.png) | [Video](macos/Previews/cursor.mp4) |
 
-![Seven original autumn folder icon styles](docs/folder-styles.png)
+The stills and videos are product previews. Actual appearance depends on screen size, macOS version, Desktop layout, and cursor behavior in the active app.
 
-## Requirements
+## Features
 
-- macOS 13 or later, Safari 17 or later
-- Apple Command Line Tools (`swiftc`)
+- **Spider Web:** four spiders hang from a web pinned to the top edge of each display, above the menu bar.
+- **Desktop Stickers:** movable Halloween cutouts. Their positions are saved locally.
+- **Autumn Folder Icons:** six styles are assigned to Desktop folders and remain stable until switched off.
+- **Pumpkin Wallpaper:** a pumpkin field with leaves, pinecones, stars, and webs around desktop widgets.
+- **Candy Cursor:** a pixel-art candy follows the pointer. macOS can restore its native arrow when focus changes, so pointer appearance may vary by app and system version.
 
-## Build and run the Mac app
+## Build locally
+
+Requirements: macOS 13 or later, Apple Command Line Tools with `swiftc`. To regenerate the preview media, install Python 3 with Pillow and FFmpeg.
 
 ```sh
 ./scripts/build-app.sh
-open "build/Halloween Decor.app"
+open build/Spooky.app
 ```
 
-The app creates its own wallpaper and icons. It stores backups in `~/Library/Application Support/Halloween Decor/`, including a copy of the previous wallpaper image. It opens its selection window on launch; click the pumpkin in the macOS menu bar to reopen it after closing the window. **Restore Everything** turns off all six effects and restores recorded icon and wallpaper changes. Each desktop effect is also restored when its own card is switched off. The six preview videos are original, silent, and stored inside the app. To regenerate them, run `python3 scripts/generate-previews.py` (requires Pillow and ffmpeg). To regenerate the app icon, run `python3 scripts/generate-app-icon.py` (requires Pillow and macOS `iconutil`).
+This script creates an **ad-hoc signed development app**, not a public release. It does not install a Safari extension or make the app notarized. A separate [release packaging script](scripts/package-release.sh) is ready for a Developer ID identity and notarytool profile. Review [the release checklist](docs/PUBLISHING.md) before distributing a binary.
 
-## Load the Safari extension
+## Try the Safari extension during development
 
-Safari → Settings → Advanced → Show features for web developers. Then Safari → Settings → Developer → Allow unsigned extensions → Add Temporary Extension… and choose `safari-extension`. Grant website access when Safari asks. Keep the Mac app running so Safari can read the six toggle states at `127.0.0.1:47831`.
+In Safari, enable developer features and unsigned extensions, then add the `safari-extension` directory as a temporary extension. Grant website access if you want the candy cursor on pages. Keep Spooky running: the extension reads the cursor switch from `127.0.0.1:47831`.
 
-Safari removes temporary extensions after quitting or after 24 hours. The Safari toolbar, address bar, Spotlight, and other apps' cursors are outside the extension's reach. The menu bar app remains installed locally until deleted.
+The extension currently requests access to all HTTP and HTTPS sites, including frames, to draw the cursor consistently. It is **not bundled in the Mac app** and Safari may remove a temporary extension after a restart. See [Apple's distribution requirements](https://developer.apple.com/documentation/safariservices/distributing-your-safari-web-extension) for a permanent extension.
 
-## Install locally
+For a local visual check, run `python3 -m http.server 47902 --bind 127.0.0.1` from this directory and open `http://127.0.0.1:47902/demo/live.html` in Safari.
 
-Drag `build/Halloween Decor.app` to Applications. This local build is ad-hoc signed, without a Developer ID or notarization. macOS may require System Settings → Privacy & Security → Open Anyway on first launch. A distributable Safari extension needs an Xcode containing app and signing; this repository currently provides a temporary development extension.
+## Changes to your Mac
 
-## Privacy and safety
+Spooky writes only local settings and backups. It can change the Desktop wallpaper and folder icons when you turn those effects on. Switching each effect off restores the recorded previous state. Keep `~/Library/Application Support/Halloween Decor/` until your original wallpaper and folder icons have been restored; it contains their backups. The app has no analytics or remote service calls. See [Privacy and permissions](docs/PRIVACY.md).
 
-All effects and settings stay on the Mac. The bridge listens only on `127.0.0.1`. No analytics or remote requests. The app backs up icons for Desktop folders before changing them and records the current wallpaper for each display. **Restore Everything** restores recorded changes and turns all effects off. Do not delete the app's Application Support data while folder icons or wallpaper are active.
+## Project details
 
-## Art
+- [How it works and known limitations](docs/IMPLEMENTATION.md)
+- [How to review and publish a release](docs/PUBLISHING.md)
+- [Current release audit](docs/RELEASE_AUDIT.md)
+- [GitHub description and release copy](docs/GITHUB_COPY.md)
+- [Artwork and font provenance](docs/ASSETS.md)
+- [Release notes](docs/RELEASE_NOTES.md)
+- [Security reporting](SECURITY.md)
 
-Vector art and drawings in this project are original and use a warm autumn palette. The Halloween Decor app icon uses a soft black bat silhouette inspired by the supplied reference. No Peanuts characters or third-party artwork is copied.
-
-## Status
-
-This is a local development build. See `docs/IMPLEMENTATION.md` for architecture and current limitations.
+Code and original project artwork, including the user-authorized candy cursor, are available under the [MIT License](LICENSE). Anonymous Pro remains under its bundled [SIL Open Font License](macos/Fonts/OFL.txt). Artwork provenance is documented in [ASSETS.md](docs/ASSETS.md).
