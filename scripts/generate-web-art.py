@@ -29,6 +29,7 @@ def curve(a, b, c, d, steps=100):
     return result
 
 center, draw = artwork(WIDTH)
+original_spider = Image.open(OUT / "spider.png").convert("RGBA")
 line(draw, [(0, 0), (WIDTH, 0)], 7)
 for left, right, drop in [(0, 420, 180), (420, 850, 210), (850, 1295, 192), (1295, WIDTH, 172)]:
     middle = (left+right)/2
@@ -51,18 +52,14 @@ for left, right, drop in [(0, 420, 180), (420, 850, 210), (850, 1295, 192), (129
 
 def spider(cx, thread, radius):
     line(draw, [(cx, 0), (cx, thread)], 3)
-    head = thread+radius*.38
-    body = thread+radius*1.23
-    draw.ellipse(point((cx-radius*.34, head-radius*.34))+
-                 point((cx+radius*.34, head+radius*.34)), fill=INK)
-    draw.ellipse(point((cx-radius*.68, body-radius*.72))+
-                 point((cx+radius*.68, body+radius*.72)), fill=INK)
-    for side in (-1, 1):
-        for index in range(4):
-            start = thread+radius*(.78+index*.24)
-            knee = (cx+side*radius*(.88+index*.12), start-radius*(.48-index*.12))
-            end = (cx+side*radius*(1.28+index*.15), start+radius*(.33+index*.13))
-            line(draw, [(cx+side*radius*.43, start), knee, end], 4)
+    # Preserve the detailed spider silhouette from the original web artwork.
+    scale = radius / 42
+    sprite = original_spider.resize(
+        (round(original_spider.width * scale * S),
+         round(original_spider.height * scale * S)),
+        Image.Resampling.LANCZOS,
+    )
+    center.alpha_composite(sprite, (round(cx*S-sprite.width/2), round(thread*S)))
 
 for x, length, size in [(185, 193, 34), (619, 326, 42), (1035, 422, 48), (1518, 258, 39)]:
     spider(x, length, size)
