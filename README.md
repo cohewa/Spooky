@@ -1,6 +1,8 @@
 # Spooky
 
-![Spooky — a Halloween layer for your Mac](docs/media/cover.png)
+![Spooky — a Halloween layer for your Mac, rendered in 3D](docs/media/spooky-knitted-hero.png)
+
+*Stylized 3D preview. See the actual app and feature previews below.*
 
 **Spooky adds a little Halloween to macOS:** a screen-top spider web, movable desktop stickers, illustrated folder icons, a pumpkin wallpaper with widget decorations, and a candy pointer. Turn each effect on or off in one small Mac app.
 
