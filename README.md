@@ -10,7 +10,9 @@
 
 ## See it in action
 
-[![Watch Spooky in action](docs/media/spooky-demo-poster.png)](docs/media/spooky-demo.mp4)
+[![Play the Spooky demo video](docs/media/spooky-demo-poster.png)](https://cohewa.github.io/Spooky/demo.html)
+
+[Play the 48-second video](https://cohewa.github.io/Spooky/demo.html) · [Download MP4](docs/media/spooky-demo.mp4)
 
 **Spider Web:** [Image](docs/media/webs.png) · [Animation](macos/Previews/webs.mp4)
 
@@ -44,6 +46,8 @@ For a local visual check, run `python3 -m http.server 47902 --bind 127.0.0.1` fr
 ## Changes to your Mac
 
 Spooky writes only local settings and backups. It can change the Desktop wallpaper and folder icons when you turn those effects on. Switching each effect off restores the recorded previous state. Keep `~/Library/Application Support/Halloween Decor/` until your original wallpaper and folder icons have been restored; it contains their backups. The app has no analytics or remote service calls. See [Privacy and permissions](docs/PRIVACY.md).
+
+Closing the settings window or pressing ⌘Q while effects are enabled leaves Spooky running in the menu bar. Enabled effects and sticker positions are saved and restored when Spooky starts. While an effect is on, Spooky registers itself to start at login; ad-hoc development builds use a user LaunchAgent if macOS cannot register the app as a Login Item. Turn off the toggles to remove the effects and disable automatic startup.
 
 ## Project details
 

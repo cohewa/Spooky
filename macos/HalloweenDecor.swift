@@ -1,4 +1,5 @@
 import AppKit
+import ServiceManagement
 import AVFoundation
 import Network
 import Darwin
@@ -204,65 +205,54 @@ private final class GlossyCloseButton: NSButton {
 
 private final class TopAlignedView: NSView { override var isFlipped: Bool { true } }
 
-private final class LoadingBatView: NSView {
-    private let bat = CAShapeLayer()
+private final class LoadingPawsView: NSView {
+    private var paws: [CAShapeLayer] = []
 
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        // Use the wide, angular silhouette from Spooky's app icon.
-        let silhouette = CGMutablePath()
-        silhouette.move(to: CGPoint(x: 45, y: 3))
-        silhouette.addQuadCurve(to: CGPoint(x: 33, y: 14), control: CGPoint(x: 39, y: 15))
-        silhouette.addQuadCurve(to: CGPoint(x: 24, y: 11), control: CGPoint(x: 29, y: 18))
-        silhouette.addQuadCurve(to: CGPoint(x: 15, y: 16), control: CGPoint(x: 21, y: 20))
-        silhouette.addQuadCurve(to: CGPoint(x: 4, y: 14), control: CGPoint(x: 9, y: 23))
-        silhouette.addCurve(to: CGPoint(x: 5, y: 37), control1: CGPoint(x: -1, y: 20), control2: CGPoint(x: 1, y: 32))
-        silhouette.addCurve(to: CGPoint(x: 39, y: 21), control1: CGPoint(x: 13, y: 30), control2: CGPoint(x: 28, y: 28))
-        silhouette.addLine(to: CGPoint(x: 40, y: 34))
-        silhouette.addQuadCurve(to: CGPoint(x: 45, y: 29), control: CGPoint(x: 44, y: 34))
-        silhouette.addQuadCurve(to: CGPoint(x: 50, y: 34), control: CGPoint(x: 46, y: 34))
-        silhouette.addLine(to: CGPoint(x: 51, y: 21))
-        silhouette.addCurve(to: CGPoint(x: 85, y: 37), control1: CGPoint(x: 62, y: 28), control2: CGPoint(x: 77, y: 30))
-        silhouette.addCurve(to: CGPoint(x: 86, y: 14), control1: CGPoint(x: 89, y: 32), control2: CGPoint(x: 91, y: 20))
-        silhouette.addQuadCurve(to: CGPoint(x: 75, y: 16), control: CGPoint(x: 81, y: 23))
-        silhouette.addQuadCurve(to: CGPoint(x: 66, y: 11), control: CGPoint(x: 69, y: 20))
-        silhouette.addQuadCurve(to: CGPoint(x: 57, y: 14), control: CGPoint(x: 61, y: 18))
-        silhouette.addQuadCurve(to: CGPoint(x: 45, y: 3), control: CGPoint(x: 51, y: 15))
-        silhouette.closeSubpath()
-        bat.frame = CGRect(x: 0, y: 4, width: 90, height: 40)
-        bat.path = silhouette
-        bat.fillColor = NSColor.white.cgColor
-        layer?.addSublayer(bat)
+        // Three small, alternating paw prints make the progress visible at a glance.
+        for index in 0..<3 {
+            let path = CGMutablePath()
+            path.addEllipse(in: CGRect(x: 4, y: 1, width: 11, height: 9))
+            for toe in [CGRect(x: 0, y: 10, width: 4, height: 5),
+                        CGRect(x: 5, y: 13, width: 4, height: 5),
+                        CGRect(x: 10, y: 13, width: 4, height: 5),
+                        CGRect(x: 15, y: 10, width: 4, height: 5)] {
+                path.addEllipse(in: toe)
+            }
+            let paw = CAShapeLayer()
+            paw.path = path
+            paw.fillColor = NSColor.white.cgColor
+            paw.frame = CGRect(x: CGFloat(index) * 24, y: index.isMultiple(of: 2) ? 12 : 17, width: 19, height: 19)
+            paw.opacity = 0.35
+            layer?.addSublayer(paw)
+            paws.append(paw)
+        }
         let label = NSTextField(labelWithString: "Applying…")
         label.font = InterfaceFont.regular(12)
         label.textColor = .white
-        label.frame = NSRect(x: 92, y: 12, width: 82, height: 18)
+        label.frame = NSRect(x: 78, y: 16, width: 95, height: 18)
         addSubview(label)
-        setAccessibilityLabel("Applying Halloween effect")
+        setAccessibilityLabel("Applying Halloween effect, animated paw prints")
         isHidden = true
     }
     required init?(coder: NSCoder) { fatalError() }
     func start() {
         isHidden = false
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
-        let bob = CABasicAnimation(keyPath: "position.y")
-        bob.fromValue = bat.position.y - 3
-        bob.toValue = bat.position.y + 3
-        bob.duration = 0.38
-        bob.autoreverses = true
-        bob.repeatCount = .infinity
-        bat.add(bob, forKey: "bob")
-        let pulse = CABasicAnimation(keyPath: "transform.scale")
-        pulse.fromValue = 0.92
-        pulse.toValue = 1.05
-        pulse.duration = 0.38
-        pulse.autoreverses = true
-        pulse.repeatCount = .infinity
-        bat.add(pulse, forKey: "pulse")
+        for (index, paw) in paws.enumerated() {
+            let step = CAKeyframeAnimation(keyPath: "opacity")
+            step.values = [0.35, 1, 0.35]
+            step.keyTimes = [0, 0.25, 1]
+            step.duration = 1.2
+            step.beginTime = CACurrentMediaTime() + Double(index) * 0.22
+            step.repeatCount = .infinity
+            paw.add(step, forKey: "step")
+        }
     }
     func stop() {
-        bat.removeAllAnimations()
+        paws.forEach { $0.removeAllAnimations() }
         isHidden = true
     }
 }
@@ -353,7 +343,6 @@ private final class WebOverlay {
         hide()
         for screen in NSScreen.screens {
             let size = screen.frame.size
-            let visible = screen.visibleFrame
             let window = NSWindow(contentRect: screen.frame, styleMask: [.borderless], backing: .buffered, defer: false)
             window.isOpaque = false
             window.backgroundColor = .clear
@@ -366,12 +355,11 @@ private final class WebOverlay {
             view.wantsLayer = true
             window.contentView = view
             guard let root = view.layer else { continue }
-            // Pin the cropped artwork directly to the usable screen's top edge
-            // and reduce it to half of its current size.
-            let width = min(visible.width * 0.80, 1170)
+            // Match the full-width web shown in the original screen recording.
+            let width = size.width
             let web = image("wide-web")
             let height = web.map { width * CGFloat($0.height) / CGFloat($0.width) } ?? width / 2
-            let centerX = visible.midX - screen.frame.minX
+            let centerX = size.width / 2
             let webLayer = art("wide-web", frame: CGRect(x: centerX - width / 2, y: size.height - height + 6, width: width, height: height))
             // Pivot at the screen edge and keep a little artwork above it, so
             // the web remains attached to the top throughout its gentle sway.
@@ -733,7 +721,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var item: NSStatusItem!
     private var window: NSWindow!
     private var cards: [Effect: PreviewCard] = [:]
-    private var loadingBat: LoadingBatView!
+    private var loadingPaws: LoadingPawsView!
     private var isApplying = false
     private var stickers: [StickerWindow] = []
     private let webOverlay = WebOverlay()
@@ -749,6 +737,48 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var support: URL { fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Halloween Decor", isDirectory: true) }
     private var desktop: URL { fm.homeDirectoryForCurrentUser.appendingPathComponent("Desktop", isDirectory: true) }
     private func enabled(_ effect: Effect) -> Bool { defaults.bool(forKey: effect.rawValue) }
+    private var hasActiveEffects: Bool { Effect.allCases.contains(where: enabled) }
+    private var fallbackLaunchAgent: URL {
+        fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/com.cohewa.Spooky.plist")
+    }
+    private func syncFallbackLaunchAgent(_ needed: Bool) {
+        // Ad-hoc development apps can report SMAppService.notFound. A user
+        // LaunchAgent keeps the installed app running after the next login.
+        let installedPath = Bundle.main.bundlePath
+        let stableLocation = installedPath.hasPrefix("/Applications/") ||
+            installedPath.hasPrefix(fm.homeDirectoryForCurrentUser.appendingPathComponent("Applications").path + "/")
+        guard needed && stableLocation else {
+            try? fm.removeItem(at: fallbackLaunchAgent)
+            return
+        }
+        let item: [String: Any] = [
+            "Label": "com.cohewa.Spooky",
+            "ProgramArguments": ["/usr/bin/open", "-a", installedPath, "--args", "--background"],
+            "RunAtLoad": true,
+            "LimitLoadToSessionType": "Aqua"
+        ]
+        do {
+            let data = try PropertyListSerialization.data(fromPropertyList: item, format: .xml, options: 0)
+            try fm.createDirectory(at: fallbackLaunchAgent.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try data.write(to: fallbackLaunchAgent, options: .atomic)
+        } catch {
+            NSLog("Spooky: could not install launch agent: %@", error.localizedDescription)
+        }
+    }
+    private func syncLoginItem() {
+        let service = SMAppService.mainApp
+        do {
+            if hasActiveEffects && service.status == .notRegistered {
+                try service.register()
+            } else if !hasActiveEffects && service.status != .notRegistered {
+                try service.unregister()
+            }
+        } catch {
+            NSLog("Spooky: could not update launch-at-login: %@", error.localizedDescription)
+        }
+        syncFallbackLaunchAgent(hasActiveEffects && service.status != .enabled)
+        NSLog("Spooky: launch-at-login status %ld", service.status.rawValue)
+    }
     func applicationDidFinishLaunching(_ notification: Notification) {
         try? fm.createDirectory(at: support, withIntermediateDirectories: true)
         InterfaceFont.register()
@@ -761,7 +791,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         makeWindow()
         bridge = Bridge(snapshot: { [weak self] in Dictionary(uniqueKeysWithValues: Effect.allCases.map { ($0.rawValue, self?.enabled($0) ?? false) }) })
         bridge.start()
-        showWindow()
+        if !ProcessInfo.processInfo.arguments.contains("--background") { showWindow() }
         if enabled(.stickers) { showStickers() }
         if enabled(.webs) { webOverlay.show() }
         if enabled(.wallpaper) {
@@ -781,6 +811,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         menuBarTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in self?.updateMenuBarPumpkin() }
         menuBarTimer?.tolerance = 0.2
         updateMenuBarPumpkin()
+        syncLoginItem()
     }
     private func updateMenuBarPumpkin() {
         guard let button = item.button, let host = button.window,
@@ -833,8 +864,8 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         close.action = #selector(closeWindow)
         close.setAccessibilityLabel("Close Spooky")
         root.addSubview(close)
-        loadingBat = LoadingBatView(frame: NSRect(x: size.width - 253, y: size.height - 161, width: 175, height: 50))
-        root.addSubview(loadingBat)
+        loadingPaws = LoadingPawsView(frame: NSRect(x: size.width - 253, y: size.height - 161, width: 175, height: 50))
+        root.addSubview(loadingPaws)
         let scroll = NSScrollView(frame: NSRect(x: 65, y: 35, width: size.width - 130, height: size.height - 207))
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = true
@@ -873,20 +904,29 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         cards.values.forEach { $0.pausePreview() }
         NSApp.setActivationPolicy(.accessory)
     }
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        // Live overlays need this process. Cmd-Q therefore hides the settings
+        // window while any effect is on; toggles remain the way to remove them.
+        if hasActiveEffects {
+            window.close()
+            return .terminateCancel
+        }
+        return .terminateNow
+    }
     private func toggle(_ effect: Effect) {
         runApplying { [weak self] in self?.applyToggle(effect) }
     }
     private func runApplying(_ work: @escaping () -> Void) {
         guard !isApplying else { return }
         isApplying = true
-        loadingBat.start()
+        loadingPaws.start()
         let started = ProcessInfo.processInfo.systemUptime
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
             work()
             guard let self else { return }
             let remaining = max(0, 1.1 - (ProcessInfo.processInfo.systemUptime - started))
             DispatchQueue.main.asyncAfter(deadline: .now() + remaining) {
-                self.loadingBat.stop()
+                self.loadingPaws.stop()
                 self.isApplying = false
             }
         }
@@ -905,6 +945,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
         }
         defaults.set(active, forKey: effect.rawValue)
+        syncLoginItem()
         cards[effect]?.setActive(active)
         switch effect {
         case .webs: active ? webOverlay.show() : webOverlay.hide()
@@ -925,6 +966,7 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
             defaults.set(active, forKey: effect.rawValue)
             cards[effect]?.setActive(active)
         }
+        syncLoginItem()
         if !wallpaperRestored {
             let alert = NSAlert()
             alert.messageText = "Couldn’t restore the previous wallpaper"
