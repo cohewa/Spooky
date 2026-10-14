@@ -1,6 +1,6 @@
 # Spooky
 
-![Spooky — a Halloween layer for your Mac, rendered in 3D](docs/media/spooky-knitted-hero.png)
+![Spooky — a Halloween layer for your Mac, rendered in 3D](docs/media/spooky-autumn-hero.png)
 
 *Stylized 3D preview. See the actual app and feature previews below.*
 
