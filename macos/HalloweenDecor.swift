@@ -872,11 +872,20 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if !item.isVisible { item.isVisible = true }
         item.button?.needsDisplay = true
         updateMenuBarPumpkin()
+
+        // A screen recorder can become the active app. Switch out of accessory
+        // mode before activation so macOS is allowed to bring Spooky's window
+        // forward from the menu bar while recording is in progress.
+        NSApp.setActivationPolicy(.regular)
+        NSRunningApplication.current.activate(options: [.activateAllWindows])
+        window.orderFrontRegardless()
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
         cards.values.forEach { $0.resumePreview() }
     }
-    func windowWillClose(_ notification: Notification) { cards.values.forEach { $0.pausePreview() } }
+    func windowWillClose(_ notification: Notification) {
+        cards.values.forEach { $0.pausePreview() }
+        NSApp.setActivationPolicy(.accessory)
+    }
     private func toggle(_ effect: Effect) {
         runApplying { [weak self] in self?.applyToggle(effect) }
     }
