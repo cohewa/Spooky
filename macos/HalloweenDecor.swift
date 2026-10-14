@@ -1,4 +1,5 @@
 import AppKit
+import Carbon
 import ServiceManagement
 import AVFoundation
 import Network
@@ -905,6 +906,12 @@ private final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSApp.setActivationPolicy(.accessory)
     }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        // A system logout, restart, or shutdown must never be cancelled.
+        let reason = NSAppleEventManager.shared().currentAppleEvent?
+            .paramDescriptor(forKeyword: AEKeyword(kAEQuitReason))?.enumCodeValue
+        if let reason, [kAEQuitAll, kAEShutDown, kAERestart, kAELogOut, kAEReallyLogOut].contains(reason) {
+            return .terminateNow
+        }
         // Live overlays need this process. Cmd-Q therefore hides the settings
         // window while any effect is on; toggles remain the way to remove them.
         if hasActiveEffects {
