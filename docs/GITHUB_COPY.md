@@ -14,7 +14,7 @@
 
 ## Binary Release draft (use only after signing and notarization)
 
-**Title:** Spooky 0.5.23 for macOS
+**Title:** Spooky 0.5.24 for macOS
 
 > Spooky adds five optional Halloween effects to your Mac. This release includes an illustrated pumpkin wallpaper, 52 movable desktop stickers, six folder styles, a screen-top spider web, and a candy pointer. Switch each effect off to restore the previously recorded desktop state.
 >

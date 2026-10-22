@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "${0:A:h}/.."
 mkdir -p 'build/Spooky.app/Contents/MacOS' 'build/Spooky.app/Contents/Resources'
+export CLANG_MODULE_CACHE_PATH="${CLANG_MODULE_CACHE_PATH:-$PWD/build/clang-module-cache}"
 swiftc -O -framework AppKit -framework AVFoundation -framework Network -o 'build/Spooky.app/Contents/MacOS/Spooky' macos/HalloweenDecor.swift
 cp macos/Info.plist 'build/Spooky.app/Contents/Info.plist'
 cp macos/HalloweenDecor.icns 'build/Spooky.app/Contents/Resources/'

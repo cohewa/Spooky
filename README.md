@@ -16,6 +16,10 @@
 
 **Spider Web:** [Image](docs/media/webs.png) · [Animation](macos/Previews/webs.mp4)
 
+**Short feature clips:** [Candy Cursor](docs/media/cursor-toggle-flow.mp4) · [Autumn Folders](docs/media/folders-social.mp4) · [Spider Web](docs/media/web-social.mp4)
+
+![Candy Cursor over a code editor](docs/media/cursor-code-hero.png)
+
 ## Features
 
 - **Spider Web:** four spiders hang from a web pinned to the top edge of each display, above the menu bar.

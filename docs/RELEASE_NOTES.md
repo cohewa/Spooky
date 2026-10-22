@@ -1,5 +1,12 @@
 > Historical entries below describe development builds. Uploaded ZIPs through 0.4.2 were removed from GitHub on 2026-10-14. Source tags remain; no signed, notarized Spooky installer is available yet.
 
+## Spooky 0.5.24 — release preparation
+
+- Restored the original hanging spiders and updated the five in-app feature previews, including larger desktop stickers and folder icons.
+- Changed the applying indicator to the peeking ghost.
+- Added shareable cursor, folder, and web animations and a close-up candy cursor image for the project gallery.
+- Aligned the Mac app and Safari development extension version numbers. The Safari extension still requires a containing app before it can be permanently distributed.
+
 ## Spooky 0.5.23 — source preview
 
 - Restored the earlier user-supplied Halloween candy sprite as the Mac and Safari cursor; the project owner confirmed its redistribution rights and selected MIT licensing for project artwork.
