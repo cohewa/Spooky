@@ -1,4 +1,4 @@
-# Spooky release audit — 2026-10-14
+# Spooky release audit — 2026-10-22
 
 ## Checked locally
 
@@ -16,10 +16,12 @@ The repository is already public. Its 11 existing Halloween Decor releases had 2
 
 On 2026-10-14, all 22 ZIPs were backed up locally in the Git-ignored `dist/legacy-release-backup/` directory and their sizes and SHA-256 hashes matched GitHub's release metadata. The uploaded ZIPs were then deleted. A fresh GitHub API read confirmed that all 11 release pages remain, each has zero uploaded assets, and each description warns that the old builds are not installable Spooky releases. GitHub's automatically generated source archives remain available through the preserved tags; they can contain earlier artwork.
 
+On 2026-10-22, version 0.5.24 source and new feature media were pushed to `cohewa/Spooky`. Apple issued a Developer ID Application certificate for the project owner; its private key is in the local login Keychain, and the temporary key and PKCS#12 files were removed from the working directory. The build script now produces a universal Intel/Apple Silicon binary targeting macOS 13. The signed download still requires notarization, stapling, and a Gatekeeper check before it can be published.
+
 ## Still required before a binary release
 
-1. Obtain a Developer ID Application identity, create a notarytool keychain profile, then run and review `scripts/package-release.sh`.
-2. Install/select full Xcode and package the Safari Web Extension in a signed containing app if the binary release advertises Safari support.
+1. Store an Apple notarytool credential in the local Keychain, then run and review `scripts/package-release.sh`.
+2. Package the Safari Web Extension in a signed containing app if the binary release advertises Safari support.
 3. Verify the actual signed archive on a clean Mac, including Desktop restoration, multiple displays, Safari permissions, and Gatekeeper behavior.
 
-The 0.5.23 source preview contains the code, artwork, and media described above. It is published without an installable ZIP because Developer ID notarization and permanent Safari packaging remain pending.
+The 0.5.23 source preview remains available without an installable ZIP. A 0.5.24 installable ZIP must not be uploaded until notarization passes. The Safari extension remains a development-only component of the public source tree.
