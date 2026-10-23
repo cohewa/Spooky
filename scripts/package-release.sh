@@ -14,7 +14,17 @@ if ! xcrun --find stapler >/dev/null 2>&1; then
   echo 'Apple stapler is required.' >&2
   exit 1
 fi
-if ! security find-identity -v -p codesigning | grep -Fq "$SPOOKY_DEVELOPER_ID"; then
+keychain_args=()
+identity_keychain_args=()
+if [[ -n "${SPOOKY_SIGNING_KEYCHAIN:-}" ]]; then
+  keychain_args=(--keychain "$SPOOKY_SIGNING_KEYCHAIN")
+  identity_keychain_args=("$SPOOKY_SIGNING_KEYCHAIN")
+  if [[ ! -f "$SPOOKY_SIGNING_KEYCHAIN" ]]; then
+    echo 'The requested signing keychain does not exist.' >&2
+    exit 1
+  fi
+fi
+if ! security find-identity -v -p codesigning "${identity_keychain_args[@]}" | grep -Fq "$SPOOKY_DEVELOPER_ID"; then
   echo 'The requested Developer ID Application identity is not in the keychain.' >&2
   exit 1
 fi
@@ -24,7 +34,7 @@ app='build/Spooky.app'
 version=$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$app/Contents/Info.plist")
 archive="Spooky-${version}-macOS.zip"
 mkdir -p dist
-codesign --force --deep --options runtime --timestamp --sign "$SPOOKY_DEVELOPER_ID" "$app"
+codesign --force --deep --options runtime --timestamp "${keychain_args[@]}" --sign "$SPOOKY_DEVELOPER_ID" "$app"
 codesign --verify --deep --strict --verbose=2 "$app"
 ditto -c -k --sequesterRsrc --keepParent "$app" "dist/$archive"
 xcrun notarytool submit "dist/$archive" --keychain-profile "$SPOOKY_NOTARY_PROFILE" --wait

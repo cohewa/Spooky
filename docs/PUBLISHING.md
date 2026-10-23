@@ -2,7 +2,7 @@
 
 ## Текущий статус
 
-Репозиторий [`cohewa/Spooky`](https://github.com/cohewa/Spooky) **публичный**. Из 11 старых релизов Halloween Decor 2026-10-14 удалены все 22 загруженных ZIP-архива приложения и временного Safari-расширения. Их страницы и теги сохранены; автоматически создаваемые GitHub архивы исходного кода остаются доступными и не являются установщиком Spooky. Архив прежней версии `v0.4.2` был ad-hoc подписан, а проверка Gatekeeper на этом Mac вернула `rejected`. Spooky 0.5.23 опубликована как исходная версия без установочного ZIP. Для 0.5.24 установлен сертификат Developer ID Application, а скрипт сборки создаёт универсальное приложение для Intel и Apple Silicon с минимальной macOS 13. Safari-расширение по-прежнему устанавливается временно в режиме разработки и не входит в приложение.
+Репозиторий [`cohewa/Spooky`](https://github.com/cohewa/Spooky) **публичный**. [Spooky 0.5.24](https://github.com/cohewa/Spooky/releases/tag/v0.5.24) — первый скачиваемый релиз приложения: универсальная сборка для Intel и Apple Silicon с минимальной macOS 13, подписанная Developer ID и нотарифицированная Apple. Из 11 старых релизов Halloween Decor 2026-10-14 удалены все 22 загруженных ZIP-архива приложения и временного Safari-расширения. Их страницы и теги сохранены; автоматически создаваемые GitHub архивы исходного кода остаются доступными и не являются установщиком Spooky. Архив прежней версии `v0.4.2` был ad-hoc подписан, а проверка Gatekeeper на этом Mac вернула `rejected`. Spooky 0.5.23 опубликована как исходная версия без установочного ZIP. Safari-расширение по-прежнему устанавливается временно в режиме разработки и не входит в приложение.
 
 ## 1. Проверка перед релизом
 
@@ -34,13 +34,13 @@
 
 ## 3. Подпись и распространение
 
-Для скачиваемого приложения вне Mac App Store нужна подпись **Developer ID**, hardened runtime, отправка на notarization и проверка Gatekeeper на чистом Mac. Текущий `scripts/build-app.sh` делает только ad-hoc подпись. Не выкладывать её как обычный пользовательский релиз и не просить людей отключать защиту macOS. [Apple: Developer ID](https://developer.apple.com/developer-id/) · [Apple: распространение macOS](https://developer.apple.com/macos/distribution/) · [Apple: упаковка приложения](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution).
+Для скачиваемого приложения вне Mac App Store нужны подпись **Developer ID**, hardened runtime и notarization. Финальный архив 0.5.24 проверен локально через Gatekeeper после распаковки; дополнительная проверка установки на втором Mac остаётся полезной. `scripts/build-app.sh` делает только ad-hoc подпись. Не выкладывать её как обычный пользовательский релиз и не просить людей отключать защиту macOS. [Apple: Developer ID](https://developer.apple.com/developer-id/) · [Apple: распространение macOS](https://developer.apple.com/macos/distribution/) · [Apple: упаковка приложения](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution).
 
 Safari Web Extension нужно упаковать в содержащее приложение, подписать и распространять по правилам Apple. Временная папка `safari-extension/` годится для разработки. [Apple: распространение Safari Web Extension](https://developer.apple.com/documentation/safariservices/distributing-your-safari-web-extension).
 
-`scripts/package-release.sh` собирает приложение, подписывает его с hardened runtime, отправляет архив на notarization, прикрепляет ticket, проверяет Gatekeeper и создаёт архив с SHA-256. Скрипт принимает имя идентификатора через `SPOOKY_DEVELOPER_ID` и имя профиля ключницы через `SPOOKY_NOTARY_PROFILE`; секреты в репозиторий не записываются. Для постоянного Safari-расширения нужно создать содержащее приложение в Xcode; текущий скрипт его не упаковывает.
+`scripts/package-release.sh` собирает приложение, подписывает его с hardened runtime, отправляет архив на notarization, прикрепляет ticket, проверяет Gatekeeper и создаёт архив с SHA-256. Скрипт принимает идентификатор подписи через `SPOOKY_DEVELOPER_ID`, профиль нотарификации через `SPOOKY_NOTARY_PROFILE` и, при использовании отдельной ключницы, её путь через `SPOOKY_SIGNING_KEYCHAIN`. Секреты в репозиторий не записываются. Для постоянного Safari-расширения нужно создать содержащее приложение в Xcode; текущий скрипт его не упаковывает.
 
-Выпуск на GitHub оформить как Release с тегом, описанием версии, архивом приложения, checksum и ссылками на видео. Черновик текста есть в [GITHUB_COPY.md](GITHUB_COPY.md). [GitHub: releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository). При первом распространении проверить архив на втором Mac, а не только в рабочей копии.
+Выпуск на GitHub оформить как Release с тегом, описанием версии, архивом приложения, checksum и ссылками на видео. Текст есть в [GITHUB_COPY.md](GITHUB_COPY.md). [GitHub: releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository). После первого распространения дополнительно проверить установку на втором Mac, а не только в рабочей копии.
 
 ## 4. Безопасность репозитория
 

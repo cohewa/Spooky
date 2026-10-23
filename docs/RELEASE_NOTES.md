@@ -1,6 +1,6 @@
-> Historical entries below describe development builds. Uploaded ZIPs through 0.4.2 were removed from GitHub on 2026-10-14. Source tags remain; no signed, notarized Spooky installer is available yet.
+> Spooky 0.5.24 is the first signed and notarized downloadable Mac release. Historical entries below describe development builds. Uploaded ZIPs through 0.4.2 were removed from GitHub on 2026-10-14; their source tags remain.
 
-## Spooky 0.5.24 — release preparation
+## Spooky 0.5.24 — macOS release
 
 - Restored the original hanging spiders and updated the five in-app feature previews, including larger desktop stickers and folder icons.
 - Changed the applying indicator to the peeking ghost.

@@ -1,4 +1,4 @@
-# Spooky release audit — 2026-10-22
+# Spooky release audit — 2026-10-23
 
 ## Checked locally
 
@@ -7,8 +7,10 @@
 - The active Desktop wallpaper, while the wallpaper switch is on, has the same bytes as the new bundled pumpkin artwork.
 - The built app contains 52 independent sticker PNGs and six new folder icons; it does not contain the removed `halloween-objects.png` or `ghost.png` source files.
 - The overview video is 18 seconds. Frames across all five effects were inspected visually; the app screenshot shows only the isolated Spooky window and has no screenshot metadata.
-- Current text files and all 14 existing Git commits were scanned for common API-token formats, private-key headers, and local home paths; no matches were found. This is a targeted scan, not a guarantee against every secret format.
-- On 2026-10-14, the earlier user-supplied candy cursor was restored to the Mac and Safari assets. The project owner confirmed redistribution rights and chose MIT for all project artwork. The app icon, web, and loader bat were replaced with original project artwork.
+- At the earlier source audit, text files and the 14 Git commits then present were scanned for common API-token formats, private-key headers, and local home paths; no matches were found. This is a targeted scan, not a guarantee against every secret format.
+- On 2026-10-14, the earlier user-supplied candy cursor was restored to the Mac and Safari assets. The project owner confirmed redistribution rights and chose MIT for all project artwork. The app icon and web were replaced with original project artwork; 0.5.24 uses a drawn peeking ghost for the applying indicator.
+- Apple accepted notarization submission `9e86384c-cc03-4cdd-9c43-b2730c2f0227` for `Spooky-0.5.24-macOS.zip`. The ticket was stapled before the final archive was made.
+- The final ZIP passed SHA-256 verification. After extracting it into a fresh temporary directory, `codesign --verify --deep --strict`, `xcrun stapler validate`, and `spctl --assess --type execute` passed; Gatekeeper reported `source=Notarized Developer ID`. The app reports version 0.5.24 and contains `x86_64` and `arm64` executables.
 
 ## Public GitHub state
 
@@ -16,12 +18,13 @@ The repository is already public. Its 11 existing Halloween Decor releases had 2
 
 On 2026-10-14, all 22 ZIPs were backed up locally in the Git-ignored `dist/legacy-release-backup/` directory and their sizes and SHA-256 hashes matched GitHub's release metadata. The uploaded ZIPs were then deleted. A fresh GitHub API read confirmed that all 11 release pages remain, each has zero uploaded assets, and each description warns that the old builds are not installable Spooky releases. GitHub's automatically generated source archives remain available through the preserved tags; they can contain earlier artwork.
 
-On 2026-10-22, version 0.5.24 source and new feature media were pushed to `cohewa/Spooky`. Apple issued a Developer ID Application certificate for the project owner; its private key is in the local login Keychain, and the temporary key and PKCS#12 files were removed from the working directory. The build script now produces a universal Intel/Apple Silicon binary targeting macOS 13. The signed download still requires notarization, stapling, and a Gatekeeper check before it can be published.
+On 2026-10-22, version 0.5.24 source and new feature media were pushed to `cohewa/Spooky`. Apple issued a Developer ID Application certificate for the project owner. When the login Keychain did not allow unattended signing, a second certificate with the same Developer ID rights was issued and imported into a dedicated local Spooky keychain. Temporary private-key and PKCS#12 files were removed. The notarization profile is stored locally in Keychain. No signing credentials or keychain files are tracked by Git.
 
-## Still required before a binary release
+The [0.5.24 GitHub release](https://github.com/cohewa/Spooky/releases/tag/v0.5.24) contains the notarized, stapled universal Mac app ZIP and its SHA-256 checksum.
 
-1. Store an Apple notarytool credential in the local Keychain, then run and review `scripts/package-release.sh`.
-2. Package the Safari Web Extension in a signed containing app if the binary release advertises Safari support.
-3. Verify the actual signed archive on a clean Mac, including Desktop restoration, multiple displays, Safari permissions, and Gatekeeper behavior.
+## Remaining follow-up
 
-The 0.5.23 source preview remains available without an installable ZIP. A 0.5.24 installable ZIP must not be uploaded until notarization passes. The Safari extension remains a development-only component of the public source tree.
+1. Package the Safari Web Extension in a signed containing app before advertising Safari support in a future binary release.
+2. Perform an additional install and visual smoke check on a second Mac, including Desktop restoration and multiple displays.
+
+The 0.5.23 source preview remains available without an installable ZIP. The Safari extension remains a development-only component of the public source tree.

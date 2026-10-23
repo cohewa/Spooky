@@ -6,7 +6,7 @@
 
 **Spooky adds a little Halloween to macOS:** a screen-top spider web, movable desktop stickers, illustrated folder icons, a pumpkin wallpaper with widget decorations, and a candy pointer. Turn each effect on or off in one small Mac app.
 
-> **Release status:** This repository publishes source code, MIT-licensed artwork, and previews. The Mac app built locally is a development build; the Safari extension currently uses Safari's temporary extension workflow. Uploaded binaries were removed from all 11 older Halloween Decor releases because they were ad-hoc signed and not notarized. Their pages and source tags remain for historical reference; GitHub's automatic source archives are not a Spooky installer. A public, one-click Spooky download requires a signed and notarized Mac build and a packaged Safari extension if that extension is advertised. See [Publishing](docs/PUBLISHING.md).
+> **Download:** [Spooky 0.5.24 for macOS](https://github.com/cohewa/Spooky/releases/tag/v0.5.24) is the signed and Apple-notarized Mac app. The Safari extension is a separate development-only component and is not included in the download. Older Halloween Decor release pages remain for historical reference, but their unnotarized ZIPs were removed. GitHub's automatic source archives are not installers. See [Publishing](docs/PUBLISHING.md).
 
 ## See it in action
 
@@ -28,6 +28,10 @@
 - **Pumpkin Wallpaper:** a pumpkin field with leaves, pinecones, stars, and webs around desktop widgets.
 - **Candy Cursor:** a pixel-art candy follows the pointer. macOS can restore its native arrow when focus changes, so pointer appearance may vary by app and system version.
 
+## Install
+
+Download [`Spooky-0.5.24-macOS.zip`](https://github.com/cohewa/Spooky/releases/download/v0.5.24/Spooky-0.5.24-macOS.zip), unzip it, and move `Spooky.app` to Applications. Open the app and choose which effects to enable. This universal build supports Apple Silicon and Intel Macs running macOS 13 or later. The [release page](https://github.com/cohewa/Spooky/releases/tag/v0.5.24) includes a SHA-256 checksum.
+
 ## Build locally
 
 Requirements: macOS 13 or later, Apple Command Line Tools with `swiftc`. To regenerate the preview media, install Python 3 with Pillow and FFmpeg.
@@ -37,7 +41,7 @@ Requirements: macOS 13 or later, Apple Command Line Tools with `swiftc`. To rege
 open build/Spooky.app
 ```
 
-This script creates an **ad-hoc signed development app**, not a public release. It does not install a Safari extension or make the app notarized. A separate [release packaging script](scripts/package-release.sh) is ready for a Developer ID identity and notarytool profile. Review [the release checklist](docs/PUBLISHING.md) before distributing a binary.
+This script creates an **ad-hoc signed development app**, not the downloadable release. It does not install a Safari extension or notarize the app. The [release packaging script](scripts/package-release.sh) signs with Developer ID, notarizes, staples, and checks the app before distribution. See [the release checklist](docs/PUBLISHING.md).
 
 ## Try the Safari extension during development
 

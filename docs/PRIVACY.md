@@ -15,4 +15,4 @@ The Mac app listens on `127.0.0.1:47831` and exposes only five on/off values to 
 
 Backups and settings remain under `~/Library/Application Support/Halloween Decor/` and macOS user defaults. Do not delete the backups while themed folder icons or wallpaper are active. Turn effects off first and check that the previous appearance returned.
 
-Spooky does not currently provide automatic updates. Download future builds only from a release published by the repository owner, and verify the developer signature and checksum when those are available.
+Spooky does not currently provide automatic updates. Download builds only from a release published by the repository owner. The 0.5.24 release includes a SHA-256 checksum, and its app is signed with the owner's Developer ID and notarized by Apple.
